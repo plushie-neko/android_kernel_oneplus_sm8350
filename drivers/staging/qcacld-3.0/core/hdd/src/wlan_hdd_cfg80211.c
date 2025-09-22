@@ -160,8 +160,8 @@
 #include "hif.h"
 #include "wlan_reg_ucfg_api.h"
 #include "wlan_hdd_twt.h"
-#include "wlan_if_mgr_ucfg_api.h"
-#include "wlan_if_mgr_public_struct.h"
+#include <wlan_if_mgr_ucfg_api.h>
+#include <wlan_if_mgr_public_struct.h>
 #include "wlan_wfa_ucfg_api.h"
 #include "wlan_roam_debug.h"
 #include "wlan_pkt_capture_ucfg_api.h"
