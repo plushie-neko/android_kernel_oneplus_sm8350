@@ -211,11 +211,12 @@ int cqhci_host_init_crypto_qti_spec(struct cqhci_host *host,
 				host->crypto_cap_array[cap_idx].sdus_mask * 512;
 	}
 
+	#ifdef CONFIG_MMC_CRYPTO
 	host->mmc->ksm = keyslot_manager_create(host->mmc->parent,
-				       cqhci_num_keyslots(host), ksm_ops,
-				       BLK_CRYPTO_FEATURE_WRAPPED_KEYS,
-				       crypto_modes_supported,
-				       host);
+			       cqhci_num_keyslots(host), ksm_ops,
+			       BLK_CRYPTO_FEATURE_WRAPPED_KEYS,
+			       crypto_modes_supported,
+			       host);
 
 	if (!host->mmc->ksm) {
 		err = -ENOMEM;
@@ -224,6 +225,7 @@ int cqhci_host_init_crypto_qti_spec(struct cqhci_host *host,
 
 	host->mmc->caps2 |= MMC_CAP2_CRYPTO;
 	keyslot_manager_set_max_dun_bytes(host->mmc->ksm, sizeof(u32));
+#endif
 
 	/*
 	 * In case host controller supports cryptographic operations
@@ -319,7 +321,9 @@ int cqhci_crypto_qti_resume(struct cqhci_host *host)
 
 int cqhci_crypto_qti_recovery_finish(struct cqhci_host *host)
 {
+#ifdef CONFIG_MMC_CRYPTO
 	keyslot_manager_reprogram_all_keys(host->mmc->ksm);
+#endif
 	return 0;
 }
 
