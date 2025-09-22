@@ -97,8 +97,8 @@
 #include <wlan_hdd_dcs.h>
 #include "wlan_tdls_ucfg_api.h"
 #include "wlan_mlme_twt_ucfg_api.h"
-#include <wlan_if_mgr_ucfg_api.h>
-#include <wlan_if_mgr_public_struct.h>
+#include "../../../../qca-wifi-host-cmn/umac/cmn_services/interface_mgr/inc/wlan_if_mgr_ucfg_api.h"
+#include "../../../../qca-wifi-host-cmn/umac/cmn_services/interface_mgr/inc/wlan_if_mgr_public_struct.h"
 #include "wlan_hdd_scan.h"
 
 #define ACS_SCAN_EXPIRY_TIMEOUT_S 4

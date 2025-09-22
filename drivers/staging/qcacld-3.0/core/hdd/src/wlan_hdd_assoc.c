@@ -79,8 +79,8 @@
 
 #include <ol_defines.h>
 #include "wlan_pkt_capture_ucfg_api.h"
-#include <wlan_if_mgr_ucfg_api.h>
-#include <wlan_if_mgr_public_struct.h>
+#include "../../../../qca-wifi-host-cmn/umac/cmn_services/interface_mgr/inc/wlan_if_mgr_ucfg_api.h"
+#include "../../../../qca-wifi-host-cmn/umac/cmn_services/interface_mgr/inc/wlan_if_mgr_public_struct.h"
 #include "wlan_roam_debug.h"
 
 #include "wlan_hdd_twt.h"

@@ -76,9 +76,9 @@
 #include "wlan_pkt_capture_ucfg_api.h"
 #include "wlan_psoc_mlme_api.h"
 #include "wlan_cm_roam_api.h"
-#include <wlan_if_mgr_public_struct.h>
-#include <wlan_if_mgr_ucfg_api.h>
-#include <wlan_if_mgr_roam.h>
+#include "../../../../qca-wifi-host-cmn/umac/cmn_services/interface_mgr/inc/wlan_if_mgr_public_struct.h"
+#include "../../../../qca-wifi-host-cmn/umac/cmn_services/interface_mgr/inc/wlan_if_mgr_ucfg_api.h"
+#include "../../../components/cmn_services/interface_mgr/inc/wlan_if_mgr_roam.h"
 #include "wlan_roam_debug.h"
 #include "wlan_cm_roam_public_struct.h"
 #include "wlan_mlme_twt_api.h"
