@@ -6208,7 +6208,7 @@ static int goodix_tp_probe(struct i2c_client *client,
 	/* 7. set ts data to chip_info*/
 
 	chip_info->monitor_data = &ts->monitor_data;
-	chip_info->kernel_grip_support = ts->kernel_grip_support;
+	chip_info->kernel_grip_support = of_property_read_bool(ts->dev->of_node, "kernel_grip_support");
 	chip_info->detail_debug_info_support = of_property_read_bool(ts->dev->of_node, "goodix_detail_debug_info_support");
 	chip_info->tp_index = ts->tp_index;
 
