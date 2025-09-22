@@ -3183,8 +3183,8 @@ static int  sec_apk_tp_info_get(void *chip_data, char *buf, int len)
 	ret = snprintf(buf, len, "IC:S6SY%03X\nFW_VER:0x%02X\nCH:%dX%d\n",
 			0x792,
 			fw_ver,
-			chip_info->hw_res->TX_NUM,
-			chip_info->hw_res->RX_NUM);
+			chip_info->hw_res->tx_num,
+			chip_info->hw_res->rx_num);
 	if (ret > len) {
 		ret = len;
 	}
