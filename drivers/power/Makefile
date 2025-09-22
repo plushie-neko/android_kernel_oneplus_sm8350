@@ -8,4 +8,5 @@ ifeq ($(strip $(CONFIG_OPLUS_CHG_OP9RT_PMIC_VOOCPHY)), y)
 else
 	obj-$(CONFIG_OPLUS_SM8350_CHARGER)	+= oplus_chg/
 endif
+obj-$(CONFIG_OPLUS_SM8250_CHARGER)	+= oplus/
 #endif
