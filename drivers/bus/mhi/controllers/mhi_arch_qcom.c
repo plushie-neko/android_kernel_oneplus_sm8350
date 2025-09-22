@@ -509,7 +509,7 @@ int mhi_arch_pcie_init(struct mhi_controller *mhi_cntrl)
 			return -ENOMEM;
 
 				ret = of_property_read_u32_array(mhi_dev->pci_dev->dev.of_node,
-						"icc-peak-bw", arch_info->icc_peak_bw_len);
+						"icc-peak-bw", arch_info->icc_peak_bw, arch_info->icc_peak_bw_len);
 		if (ret)
 			return -EINVAL;
 
