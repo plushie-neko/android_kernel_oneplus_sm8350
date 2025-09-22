@@ -497,7 +497,7 @@ int mhi_arch_pcie_init(struct mhi_controller *mhi_cntrl)
 			return ret;
 		}
 
-		of_get_property(pdev->dev.of_node, "icc_peak_bw", &size);
+		of_get_property(mhi_dev->pci_dev->dev.of_node, "icc_peak_bw", &size);
 		if (!size)
 			return -EINVAL;
 
@@ -508,8 +508,8 @@ int mhi_arch_pcie_init(struct mhi_controller *mhi_cntrl)
 		if (!arch_info->icc_peak_bw)
 			return -ENOMEM;
 
-		ret = of_property_read_u32_array(mhi_dev->pci_dev->dev.of_node,
-					"icc-peak-bw", arch_info->icc_peak_len);
+				ret = of_property_read_u32_array(mhi_dev->pci_dev->dev.of_node,
+						"icc-peak-bw", arch_info->icc_peak_bw_len);
 		if (ret)
 			return -EINVAL;
 
@@ -572,7 +572,9 @@ int mhi_arch_pcie_init(struct mhi_controller *mhi_cntrl)
 		 */
 		msm_pcie_pm_control(MSM_PCIE_DISABLE_PC, mhi_cntrl->bus,
 				    mhi_dev->pci_dev, NULL, 0);
+#ifdef CONFIG_PCI_QTI
 		mhi_dev->pci_dev->no_d3hot = true;
+#endif
 
 		mhi_cntrl->bw_scale = mhi_arch_bw_scale;
 
