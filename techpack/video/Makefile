@@ -8,6 +8,15 @@ LINUXINCLUDE    += -include $(srctree)/techpack/video/config/konavidconf.h
 endif
 
 # auto-detect subdirs
+ifeq ($(CONFIG_ARCH_KONA), y)
+include $(srctree)/techpack/video/config/konavid.conf
+endif
+
+ifeq ($(CONFIG_ARCH_KONA), y)
+LINUXINCLUDE    += -include $(srctree)/techpack/video/config/konavidconf.h
+endif
+
+# auto-detect subdirs
 ifeq ($(CONFIG_ARCH_HOLI), y)
 include $(srctree)/techpack/video/config/holivid.conf
 endif
