@@ -90,7 +90,7 @@ endif
 ifeq ($(CONFIG_ARCH_SM6150), y)
 LINUXINCLUDE    += \
 		-include $(srctree)/techpack/camera/config/sm6150cameraconf.h
-endif
+endifKONA
 
 endif
 
