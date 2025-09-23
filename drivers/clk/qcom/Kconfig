@@ -381,6 +381,70 @@ config SM_VIDEOCC_8150
 	  Say Y if you want to support video devices and functionality such as
 	  video encode/decode.
 
+config SM_GCC_KONA
+	tristate "KONA Global Clock Controller"
+	depends on COMMON_CLK_QCOM
+	select QCOM_GDSC
+	help
+	  Support for the global clock controller on Qualcomm Technologies, Inc
+	  KONA devices.
+	  Say Y if you want to use peripheral devices such as UART, SPI, I2C,
+	  USB, UFS, SD/eMMC, PCIe, etc.
+
+config SM_CAMCC_KONA
+	tristate "kona Camera Clock Controller"
+	depends on SM_GCC_KONA
+	help
+	  Support for the camera clock controller on Qualcomm Technologies, Inc.
+	  KONA devices.
+	  Say Y if you want to support camera devices and functionality such as
+	  capturing pictures.
+
+config SM_VIDEOCC_KONA
+	tristate "Kona Video Clock Controller"
+	depends on SM_GCC_KONA
+	help
+	  Support for the video clock controller on Qualcomm Technologies, Inc.
+	  KONA devices.
+	  Say Y if you want to support video devices and functionality such as
+	  video encode/decode.
+
+config SM_GPUCC_KONA
+	tristate "Kona Graphics Clock Controller"
+	depends on SM_GCC_KONA
+	help
+	  Support for the graphics clock controller on Qualcomm Technologies, Inc.
+	  KONA devices.
+	  Say Y if you want to support graphics controller devices and
+	  functionality such as 3D graphics.
+
+config SM_DISPCC_KONA
+	tristate "KONA Display Clock Controller"
+	depends on SM_GCC_KONA
+	help
+	  Support for the display clock controller on Qualcomm Technologies, Inc.
+	  Kona devices.
+	  Say Y if you want to support display devices and functionality such as
+	  splash screen.
+
+config SM_NPUCC_KONA
+	tristate "KONA NPU Clock Controller"
+	select SM_GCC_KONA
+	help
+	  Support for the NPU Clock Controller on Qualcomm Technologies, Inc.
+	  KONA devices.
+	  Say Y if you want to enable use of the Network Processing Unit in
+	  order to speed up certain types of calculations.
+
+config SM_DEBUGCC_KONA
+	tristate "KONA Debug Clock Controller"
+	depends on SM_GCC_KONA
+	help
+	  Support for the debug clock controller on Qualcomm Technologies, Inc.
+	  KONA devices.
+	  Say Y if you want to support the debug clocks such as clock measurement
+	  functionality.
+
 config SPMI_PMIC_CLKDIV
 	tristate "SPMI PMIC clkdiv Support"
 	depends on SPMI || COMPILE_TEST
