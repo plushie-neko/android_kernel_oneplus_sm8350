@@ -25,7 +25,7 @@
 #include <wlan_objmgr_psoc_obj.h>
 #include <wlan_objmgr_pdev_obj.h>
 #include <wlan_objmgr_vdev_obj.h>
-#include <wlan_if_mgr_public_struct.h>
+#include "wlan_if_mgr_public_struct.h"
 
 #define ifmgr_alert(params...) \
 	QDF_TRACE_FATAL(QDF_MODULE_ID_IFMGR, params)

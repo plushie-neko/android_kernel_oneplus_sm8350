@@ -17,7 +17,7 @@
 /*
  * DOC: contains interface manager public api
  */
-#include "wlan_if_mgr_public_struct.h"
+#include "../inc/wlan_if_mgr_public_struct.h"
 #include "wlan_if_mgr_api.h"
 #include "wlan_if_mgr_sta.h"
 #include "wlan_if_mgr_ap.h"
