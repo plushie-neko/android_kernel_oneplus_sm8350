@@ -4198,7 +4198,41 @@ static void __maybe_unused lcd_tp_refresh_switch(unsigned int tp_index, int fps)
 
 }
 
-static int __maybe_unused tp_control_cs_gpio(bool enable, unsigned int tp_index)\n{\n\tstruct touchpanel_data *ts = NULL;\n\tint rc = 0;\n\n\tif (tp_index >= TP_SUPPORT_MAX) {\n\t\treturn 0;\n\t}\n\n\tts = g_tp[tp_index];\n\n\tif (!ts) {\n\t\treturn 0;\n\t}\n\n\tif (gpio_is_valid(ts->hw_res.cs_gpio)) {\n\t\trc = gpio_direction_output(ts->hw_res.cs_gpio, enable);\n\t\tif (rc) {\n\t\t\tTP_INFO(ts->tp_index, \"unable to set dir for cs_gpio rc=%d\", rc);\n\t\t}\n\t\tgpio_set_value(ts->hw_res.cs_gpio, enable);\n\t\tTPD_INFO(\"%s:set cs %d\\n\", __func__, enable);\n\t}\n\tif (!IS_ERR_OR_NULL(ts->hw_res.pin_cs_high) && enable) {\n\t\tTPD_INFO(\"%s: going to set cs on gpio mode and high.\\n\", __func__);\n\t\tpinctrl_select_state(ts->hw_res.pinctrl, ts->hw_res.pin_cs_high);\n\t} else if (!IS_ERR_OR_NULL(ts->hw_res.pin_cs_low) && !enable) {\n\t\tTPD_INFO(\"%s: going to set cs on gpio mode and low.\\n\", __func__);\n\t\tpinctrl_select_state(ts->hw_res.pinctrl, ts->hw_res.pin_cs_low);\n\t} else {\n\t\tTPD_INFO(\"%s: not to contrl cs.\\n\", __func__);\n\t}\n\n\treturn 0;\n}
+static int __maybe_unused tp_control_cs_gpio(bool enable, unsigned int tp_index)
+{
+	struct touchpanel_data *ts = NULL;
+	int rc = 0;
+
+	if (tp_index >= TP_SUPPORT_MAX) {
+		return 0;
+	}
+
+	ts = g_tp[tp_index];
+
+	if (!ts) {
+		return 0;
+	}
+
+	if (gpio_is_valid(ts->hw_res.cs_gpio)) {
+		rc = gpio_direction_output(ts->hw_res.cs_gpio, enable);
+		if (rc) {
+			TP_INFO(ts->tp_index, "unable to set dir for cs_gpio rc=%d", rc);
+		}
+		gpio_set_value(ts->hw_res.cs_gpio, enable);
+		TPD_INFO("%s:set cs %d\n", __func__, enable);
+	}
+	if (!IS_ERR_OR_NULL(ts->hw_res.pin_cs_high) && enable) {
+		TPD_INFO("%s: going to set cs on gpio mode and high.\n", __func__);
+		pinctrl_select_state(ts->hw_res.pinctrl, ts->hw_res.pin_cs_high);
+	} else if (!IS_ERR_OR_NULL(ts->hw_res.pin_cs_low) && !enable) {
+		TPD_INFO("%s: going to set cs on gpio mode and low.\n", __func__);
+		pinctrl_select_state(ts->hw_res.pinctrl, ts->hw_res.pin_cs_low);
+	} else {
+		TPD_INFO("%s: not to contrl cs.\n", __func__);
+	}
+
+	return 0;
+}
 
 MODULE_DESCRIPTION("Touchscreen common Driver");
 MODULE_LICENSE("GPL");
