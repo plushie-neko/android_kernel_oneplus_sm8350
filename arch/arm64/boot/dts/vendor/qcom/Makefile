@@ -527,7 +527,6 @@ dtb-$(CONFIG_ARCH_SA8195)	+= sa8195p-adp-star.dtb \
 endif
 
 dtb-$(CONFIG_ARCH_SA2150P) += sa2150p-ccard-emmc.dtb
-endif
 
 ifeq ($(CONFIG_ARCH_LAHAINA), y)
 ifeq ($(CONFIG_ARCH_QTI_VM), y)
