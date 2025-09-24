@@ -5649,7 +5649,6 @@ static int msm_rx_tx_codec_init(struct snd_soc_pcm_runtime *rtd)
 	struct snd_card *card = NULL;
 	struct snd_info_entry *entry;
 	int codec_variant = -1;
-	char *data = NULL;
 	struct msm_asoc_mach_data *pdata =
 				snd_soc_card_get_drvdata(rtd->card);
 
@@ -5813,8 +5812,6 @@ static int msm_rx_tx_codec_init(struct snd_soc_pcm_runtime *rtd)
 
 	codec_reg_done = true;
 	return 0;
-err:
-	return ret;
 }
 
 static void *def_wcd_mbhc_cal(void)
@@ -5853,7 +5850,9 @@ static struct snd_soc_dai_link msm_common_dai_links[] = {
 		.name = MSM_DAILINK_NAME(Media1),
 		.stream_name = "MultiMedia1",
 		.dynamic = 1,
+#if IS_ENABLED(CONFIG_AUDIO_QGKI)
 		.async_ops = ASYNC_DPCM_SND_SOC_PREPARE,
+#endif /* CONFIG_AUDIO_QGKI */
 		.dpcm_playback = 1,
 		.dpcm_capture = 1,
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
@@ -5910,7 +5909,9 @@ static struct snd_soc_dai_link msm_common_dai_links[] = {
 		.name = MSM_DAILINK_NAME(ULL),
 		.stream_name = "MultiMedia3",
 		.dynamic = 1,
+#if IS_ENABLED(CONFIG_AUDIO_QGKI)
 		.async_ops = ASYNC_DPCM_SND_SOC_PREPARE,
+#endif /* CONFIG_AUDIO_QGKI */
 		.dpcm_playback = 1,
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
 			SND_SOC_DPCM_TRIGGER_POST},
@@ -5940,7 +5941,9 @@ static struct snd_soc_dai_link msm_common_dai_links[] = {
 		.name = MSM_DAILINK_NAME(Compress1),
 		.stream_name = "Compress1",
 		.dynamic = 1,
+#if IS_ENABLED(CONFIG_AUDIO_QGKI)
 		.async_ops = ASYNC_DPCM_SND_SOC_HW_PARAMS,
+#endif /* CONFIG_AUDIO_QGKI */
 		.dpcm_playback = 1,
 		.dpcm_capture = 1,
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
@@ -5970,11 +5973,13 @@ static struct snd_soc_dai_link msm_common_dai_links[] = {
 		.name = MSM_DAILINK_NAME(LowLatency),
 		.stream_name = "MultiMedia5",
 		.dynamic = 1,
+#if IS_ENABLED(CONFIG_AUDIO_QGKI)
 		.async_ops = ASYNC_DPCM_SND_SOC_PREPARE,
+#endif /* CONFIG_AUDIO_QGKI */
 		.dpcm_playback = 1,
 		.dpcm_capture = 1,
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
-				SND_SOC_DPCM_TRIGGER_POST},
+			SND_SOC_DPCM_TRIGGER_POST},
 		.ignore_suspend = 1,
 		/* this dainlink has playback support */
 		.ignore_pmdown_time = 1,
@@ -6459,7 +6464,11 @@ static struct snd_soc_dai_link msm_common_be_dai_links[] = {
 	{
 		.name = LPASS_BE_USB_AUDIO_RX,
 		.stream_name = "USB Audio Playback",
+#if IS_ENABLED(CONFIG_AUDIO_QGKI)
 		.dynamic_be = 1,
+#else
+		.dynamic = 1,
+#endif /* CONFIG_AUDIO_QGKI */
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id = MSM_BACKEND_DAI_USB_RX,
@@ -7056,7 +7065,11 @@ static struct snd_soc_dai_link msm_rx_tx_cdc_dma_be_dai_links[] = {
 	{
 		.name = LPASS_BE_RX_CDC_DMA_RX_0,
 		.stream_name = "RX CDC DMA0 Playback",
+#if IS_ENABLED(CONFIG_AUDIO_QGKI)
 		.dynamic_be = 1,
+#else
+		.dynamic = 1,
+#endif /* CONFIG_AUDIO_QGKI */
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id = MSM_BACKEND_DAI_RX_CDC_DMA_RX_0,
@@ -7070,7 +7083,11 @@ static struct snd_soc_dai_link msm_rx_tx_cdc_dma_be_dai_links[] = {
 	{
 		.name = LPASS_BE_RX_CDC_DMA_RX_1,
 		.stream_name = "RX CDC DMA1 Playback",
+#if IS_ENABLED(CONFIG_AUDIO_QGKI)
 		.dynamic_be = 1,
+#else
+		.dynamic = 1,
+#endif /* CONFIG_AUDIO_QGKI */
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id = MSM_BACKEND_DAI_RX_CDC_DMA_RX_1,
@@ -7083,7 +7100,11 @@ static struct snd_soc_dai_link msm_rx_tx_cdc_dma_be_dai_links[] = {
 	{
 		.name = LPASS_BE_RX_CDC_DMA_RX_2,
 		.stream_name = "RX CDC DMA2 Playback",
+#if IS_ENABLED(CONFIG_AUDIO_QGKI)
 		.dynamic_be = 1,
+#else
+		.dynamic = 1,
+#endif /* CONFIG_AUDIO_QGKI */
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id = MSM_BACKEND_DAI_RX_CDC_DMA_RX_2,
@@ -7096,7 +7117,11 @@ static struct snd_soc_dai_link msm_rx_tx_cdc_dma_be_dai_links[] = {
 	{
 		.name = LPASS_BE_RX_CDC_DMA_RX_3,
 		.stream_name = "RX CDC DMA3 Playback",
+#if IS_ENABLED(CONFIG_AUDIO_QGKI)
 		.dynamic_be = 1,
+#else
+		.dynamic = 1,
+#endif /* CONFIG_AUDIO_QGKI */
 		.no_pcm = 1,
 		.dpcm_playback = 1,
 		.id = MSM_BACKEND_DAI_RX_CDC_DMA_RX_3,
@@ -7382,7 +7407,9 @@ static struct snd_soc_dai_link msm_stub_fe_dai_links[] = {
 		.name = "MSMSTUB Media1",
 		.stream_name = "MultiMedia1",
 		.dynamic = 1,
+#if IS_ENABLED(CONFIG_AUDIO_QGKI)
 		.async_ops = ASYNC_DPCM_SND_SOC_PREPARE,
+#endif /* CONFIG_AUDIO_QGKI */
 		.dpcm_playback = 1,
 		.dpcm_capture = 1,
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
