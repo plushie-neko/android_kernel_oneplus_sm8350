@@ -94,7 +94,7 @@ endif
 
 endif
 
-ifeq (,$(filter $(CONFIG_SPECTRA_CAMERA), y m))
+ifneq (,$(filter $(CONFIG_SPECTRA_CAMERA), y m))
 # Use USERINCLUDE when you must reference the UAPI directories only.
 USERINCLUDE     += \
                 -I$(srctree)/techpack/camera/include/uapi
