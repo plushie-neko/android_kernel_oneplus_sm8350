@@ -1,4 +1,5 @@
 #include <dt-bindings/msm/msm-camera.h>
+#include <dt-bindings/interconnect/qcom,kona.h>
 
 &soc {
 	qcom,cam-req-mgr {
@@ -575,8 +576,8 @@
 		camnoc-bus-width = <32>;
 		camnoc-axi-clk-bw-margin-perc = <20>;
 		interconnect-names = "cam_ahb";
-		interconnects =<&gem_noc MASTER_APPSS_PROC
-			&config_noc SLAVE_CAMERA_CFG>;
+		interconnects =<&fab_gem_noc MASTER_APPSS_PROC
+			&fab_config_noc SLAVE_CAMERA_CFG>;
 		cam-ahb-num-cases = <8>;
 		cam-ahb-bw-KBps =
 			<0 0>, <0 76800>, <0 76800>, <0 150000>,
@@ -617,8 +618,8 @@
 					qcom,axi-port-mnoc {
 						interconnect-names = "cam_hf_0";
 						interconnects =
-						<&mmss_noc MASTER_CAMNOC_HF
-						&mc_virt SLAVE_EBI1>;
+						<&fab_mmss_noc MASTER_CAMNOC_HF
+						&fab_mc_virt SLAVE_EBI1>;
 					};
 				};
 
@@ -630,8 +631,8 @@
 					qcom,axi-port-mnoc {
 						interconnect-names = "cam_sf_0";
 						interconnects =
-						<&mmss_noc MASTER_CAMNOC_SF
-						&mc_virt SLAVE_EBI1>;
+						<&fab_mmss_noc MASTER_CAMNOC_SF
+						&fab_mc_virt SLAVE_EBI1>;
 					};
 				};
 
@@ -643,8 +644,8 @@
 					qcom,axi-port-mnoc {
 						interconnect-names = "cam_sf_icp";
 						interconnects =
-						<&mmss_noc MASTER_CAMNOC_ICP
-						&mc_virt SLAVE_EBI1>;
+						<&fab_mmss_noc MASTER_CAMNOC_ICP
+						&fab_mc_virt SLAVE_EBI1>;
 					};
 				};
 			};

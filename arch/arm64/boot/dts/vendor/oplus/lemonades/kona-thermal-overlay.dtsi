@@ -1,4 +1,4 @@
-#include <dt-bindings/thermal/thermal.h>
+#include <dt-bindings/thermal/thermal_qti.h>
 
 &mdss_mdp {
 	#cooling-cells = <2>;
