@@ -746,7 +746,13 @@ CONFIG_AUDIO_QGKI=y
 CONFIG_CNSS_UTILS=y
 CONFIG_COMMON_CLK_QCOM=y
 CONFIG_QTEE_SHM_BRIDGE=y
-CONFIG_V4L2_MEM2MEM_DEV=y
 CONFIG_NFC_QTI_I2C=y
 CONFIG_ANDROID_VENDOR_HOOKS=y
 CONFIG_QCOM_SCM=y
+CONFIG_VIDEO_DEV=y
+
+CONFIG_VIDEO_V4L2=y                                                                                                                                                                                        │
+CONFIG_V4L2_MEM2MEM_DEV=y
+CONFIG_VIDEOBUF2_CORE=y
+CONFIG_VIDEOBUF2_VMALLOC=y
+CONFIG_VIDEOBUF2_DMA_CONTIG=y
