@@ -797,7 +797,7 @@ static int sensor_fb_notifier(struct notifier_block *nb,
 {
 	int blank;
 	struct msm_drm_notifier *evdata = data;
-	struct sensor_fb_cxt *sns_cxt = container_of(nb, struct sensor_fb_cxt, fb_notif);
+	struct sensor_fb_cxt __maybe_unused *sns_cxt = container_of(nb, struct sensor_fb_cxt, fb_notif);
 
 	if (!evdata || (evdata->id != 0)) {
 		return 0;
@@ -837,8 +837,8 @@ static int sensor_fb_notifier(struct notifier_block *nb,
 {
 	int blank;
 	struct fb_event *evdata = data;
-	struct sensor_fb_cxt *sns_cxt = container_of(nb, struct sensor_fb_cxt, fb_notif);
-	struct timespec now_time;
+	struct sensor_fb_cxt __maybe_unused *sns_cxt = container_of(nb, struct sensor_fb_cxt, fb_notif);
+	struct timespec __maybe_unused now_time;
 
 	if (evdata && evdata->data) {
 		//if(event == FB_EARLY_EVENT_BLANK || event == FB_EVENT_BLANK)
