@@ -15,6 +15,11 @@ config OPLUS_SM8350_CHARGER
 	help
 	  Enables support for the sm8350 charging
 
+config OPLUS_SM8250_CHARGER
+	bool "OPLUS SM8250 charger driver"
+	help
+	  Enables support for the sm8350 charging
+
 config OPLUS_SHORT_C_BATT_CHECK
 	bool "OPLUS_SHORT_C_BATT CHECK SUPPORT"
 	default n
