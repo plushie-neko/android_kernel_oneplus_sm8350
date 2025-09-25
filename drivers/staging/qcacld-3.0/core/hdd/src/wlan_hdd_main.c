@@ -16999,6 +16999,7 @@ static int wlan_hdd_state_ctrl_param_create(void)
 {
 	int ret = 0;
 	dev_t dev;
+	struct device *device_ptr;
 
 	ret = alloc_chrdev_region(&dev, 0, 1, "wlan");
 	if (ret) {
@@ -17006,7 +17007,7 @@ static int wlan_hdd_state_ctrl_param_create(void)
 		return ret;
 	}
 
-	device = MKDEV(MAJOR(dev), 0);
+	device = dev;
 	dev_num = MINOR(dev);
 
 	cdev_init(&wlan_hdd_state_cdev, &wlan_hdd_state_fops);
@@ -17025,9 +17026,9 @@ static int wlan_hdd_state_ctrl_param_create(void)
 		goto del_cdev;
 	}
 
-	device = device_create(class, NULL, dev, NULL, "wlan");
-	if (IS_ERR(device)) {
-		ret = PTR_ERR(device);
+	device_ptr = device_create(class, NULL, dev, NULL, "wlan");
+	if (IS_ERR(device_ptr)) {
+		ret = PTR_ERR(device_ptr);
 		pr_err("Failed to create device: %d\n", ret);
 		goto destroy_class;
 	}
@@ -17047,6 +17048,11 @@ unregister_chrdev:
 
 
 
+
+
+
+
+
 static void wlan_hdd_state_ctrl_param_destroy(void)
 {
 	cdev_del(&wlan_hdd_state_cdev);
@@ -17054,8 +17060,10 @@ static void wlan_hdd_state_ctrl_param_destroy(void)
 	class_destroy(class);
 	unregister_chrdev_region(device, dev_num);
 
-	pr_info("Device node unregistered");
+	pr_info("Device node unregistered\n");
 }
+
+
 
 /**
  * hdd_component_init() - Initialize all components
