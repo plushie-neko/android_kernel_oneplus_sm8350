@@ -3056,12 +3056,12 @@ int init_touchpanel_proc(struct touchpanel_data *ts)
 	struct proc_dir_entry *prEntry_tp = NULL;
 	char name[TP_NAME_SIZE_MAX];
 
-	static tp_proc_node tp_proc_node[] = {
+	const tp_proc_node tp_proc_node_template[] = {
 		{
-			"oplus_optimized_time", 0666, NULL, &proc_optimized_time_fops, ts, false,
-			ts->optimized_show_support
+			"oplus_optimized_time", 0666, NULL, &proc_optimized_time_fops, NULL, false,
+			false
 		},
-		{"tp_index", 0666, NULL, &proc_tp_index_ops, ts, false, true},
+		{"tp_index", 0666, NULL, &proc_tp_index_ops, NULL, false, false},
 		{"debug_level", 0644, NULL, &proc_debug_level_ops, ts, false, true},
 		{
 			"double_tap_enable", 0666, NULL, &proc_gesture_control_fops, ts, false,
