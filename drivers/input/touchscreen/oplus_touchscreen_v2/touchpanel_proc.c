@@ -15,6 +15,7 @@
 #include <linux/rtc.h>
 #include <linux/syscalls.h>
 #include <linux/version.h>
+#include <linux/string.h>
 
 #include "touchpanel_common.h"
 #include "touchpanel_autotest/touchpanel_autotest.h"
@@ -3049,122 +3050,214 @@ static int init_debug_info_proc(struct touchpanel_data *ts)
  * we need to set touchpanel_data struct as private_data to those file_inode
  * Returning zero(success) or negative errno(failed)
  */
+/* Define the proc nodes as global to avoid stack overflow */
+static tp_proc_node tp_proc_nodes_template[] = {
+	{
+		"oplus_optimized_time", 0666, NULL, &proc_optimized_time_fops, NULL, false,
+		false
+	},
+	{"tp_index", 0666, NULL, &proc_tp_index_ops, NULL, false, false},
+	{"debug_level", 0644, NULL, &proc_debug_level_ops, NULL, false, true},
+	{
+		"double_tap_enable", 0666, NULL, &proc_gesture_control_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"coordinate", 0444, NULL, &proc_coordinate_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"game_switch_enable", 0666, NULL, &proc_game_switch_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{"irq_depth", 0666, NULL, &proc_get_irq_depth_fops, NULL, false, true},
+	{
+		"oplus_tp_noise_modetest", 0664, NULL, &proc_noise_modetest_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{"tp_fw_update", 0666, NULL, &proc_fw_update_ops, NULL, false, true},
+	{"oplus_register_info", 0664, NULL, &proc_register_info_fops, NULL, false, true},
+	{
+		"incell_panel", 0664, NULL, &proc_incell_panel_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"fd_enable", 0666, NULL, &tp_fd_enable_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"event_num", 0666, NULL, &tp_event_num_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"fd_touch_count", 0666, NULL, &fd_touch_num_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"fp_enable", 0666, NULL, &tp_fp_enable_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"baseline_test", 0666, NULL, &tp_auto_test_proc_fops, NULL, false, true
+	},
+	{
+		"black_screen_test", 0666, NULL, &proc_black_screen_test_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"baseline_result", 0666, NULL, &tp_auto_test_result_fops, NULL, false, true
+	},
+	{
+		"black_screen_result", 0666, NULL, &proc_black_screen_result_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"oplus_tp_direction", 0666, NULL, &touch_dir_proc_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"report_rate_white_list", 0666, NULL, &proc_rate_white_list_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"charge_detect", 0666, NULL, &proc_switch_usb_state_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"wireless_charge_detect", 0666, NULL, &proc_wireless_charge_detect_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"headset_detect", 0666, NULL, &proc_headset_detect_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"tp_aging_test", 0666, NULL, &proc_aging_test_ops, NULL, false,
+		true
+	},
+	{
+		"smooth_level", 0666, NULL, &proc_smooth_level_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"sensitive_level", 0666, NULL, &proc_sensitive_level_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"double_tap_enable_indep", 0666, NULL, &proc_gesture_control_indep_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"calibration", 0666, NULL, &proc_calibrate_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	{
+		"calibration_status", 0666, NULL, &proc_cal_status_fops, NULL, false,
+		false  /* Will be updated later */
+	},
+	/* proc/touchpanel/oplus_apk. Add the new test node for debug and apk. By zhangping 20190402 start*/
+#ifdef CONFIG_OPLUS_TP_APK
+	{"oplus_apk", 0666, NULL, &proc_oplus_apk_fops, NULL, false, true},
+#endif /* end of CONFIG_OPLUS_TP_APK*/
+};
+
 int init_touchpanel_proc(struct touchpanel_data *ts)
 {
 	int ret = 0;
 	int i = 0;
 	struct proc_dir_entry *prEntry_tp = NULL;
 	char name[TP_NAME_SIZE_MAX];
-
-	static tp_proc_node tp_proc_nodes[] = {
-		{
-			"oplus_optimized_time", 0666, NULL, &proc_optimized_time_fops, NULL, false,
-			false
-		},
-		{"tp_index", 0666, NULL, &proc_tp_index_ops, NULL, false, false},
-		{"debug_level", 0644, NULL, &proc_debug_level_ops, ts, false, true},
-		{
-			"double_tap_enable", 0666, NULL, &proc_gesture_control_fops, ts, false,
-			ts->black_gesture_support
-		},
-		{
-			"coordinate", 0444, NULL, &proc_coordinate_fops, ts, false,
-			ts->black_gesture_support
-		},
-		{
-			"game_switch_enable", 0666, NULL, &proc_game_switch_fops, ts, false,
-			ts->game_switch_support
-		},
-		{"irq_depth", 0666, NULL, &proc_get_irq_depth_fops, ts, false, true},
-		{
-			"oplus_tp_noise_modetest", 0664, NULL, &proc_noise_modetest_fops, ts, false,
-			ts->noise_modetest_support
-		},
-		{"tp_fw_update", 0666, NULL, &proc_fw_update_ops, ts, false, true},
-		{"oplus_register_info", 0664, NULL, &proc_register_info_fops, ts, false, true},
-		{
-			"incell_panel", 0664, NULL, &proc_incell_panel_fops, ts, false,
-			ts->is_incell_panel
-		},
-		{
-			"fd_enable", 0666, NULL, &tp_fd_enable_fops, ts, false,
-			ts->face_detect_support
-		},
-		{
-			"event_num", 0666, NULL, &tp_event_num_fops, ts, false,
-			ts->face_detect_support
-		},
-		{
-			"fd_touch_count", 0666, NULL, &fd_touch_num_fops, ts, false,
-			ts->face_detect_support
-		},
-		{
-			"fp_enable", 0666, NULL, &tp_fp_enable_fops, ts, false,
-			ts->fingerprint_underscreen_support
-		},
-		{
-			"baseline_test", 0666, NULL, &tp_auto_test_proc_fops, ts, false, true
-		},
-		{
-			"black_screen_test", 0666, NULL, &proc_black_screen_test_fops, ts, false,
-			ts->gesture_test_support
-		},
-		{
-			"baseline_result", 0666, NULL, &tp_auto_test_result_fops, ts, false, true
-		},
-		{
-			"black_screen_result", 0666, NULL, &proc_black_screen_result_fops, ts, false,
-			ts->gesture_test_support
-		},
-		{
-			"oplus_tp_direction", 0666, NULL, &touch_dir_proc_fops, ts, false,
-			ts->fw_edge_limit_support
-		},
-		{
-			"report_rate_white_list", 0666, NULL, &proc_rate_white_list_fops, ts, false,
-			ts->report_rate_white_list_support
-		},
-		{
-			"charge_detect", 0666, NULL, &proc_switch_usb_state_fops, ts, false,
-			ts->charger_pump_support
-		},
-		{
-			"wireless_charge_detect", 0666, NULL, &proc_wireless_charge_detect_fops, ts, false,
-			ts->wireless_charger_support
-		},
-		{
-			"headset_detect", 0666, NULL, &proc_headset_detect_fops, ts, false,
-			ts->headset_pump_support
-		},
-		{
-			"tp_aging_test", 0666, NULL, &proc_aging_test_ops, ts, false,
-			true
-		},
-		{
-			"smooth_level", 0666, NULL, &proc_smooth_level_fops, ts, false,
-			ts->smooth_level_array_support
-		},
-		{
-			"sensitive_level", 0666, NULL, &proc_sensitive_level_fops, ts, false,
-			ts->sensitive_level_array_support
-		},
-		{
-			"double_tap_enable_indep", 0666, NULL, &proc_gesture_control_indep_fops, ts, false,
-			ts->black_gesture_indep_support
-		},
-		{
-			"calibration", 0666, NULL, &proc_calibrate_fops, ts, false,
-			ts->auto_test_need_cal_support
-		},
-		{
-			"calibration_status", 0666, NULL, &proc_cal_status_fops, ts, false,
-			ts->auto_test_need_cal_support
-		},
-		/* proc/touchpanel/oplus_apk. Add the new test node for debug and apk. By zhangping 20190402 start*/
+	
+	/* Create a local copy of the template and update fields that depend on ts */
+	tp_proc_node tp_proc_nodes[ARRAY_SIZE(tp_proc_nodes_template)];
+	
+	/* Copy the template */
+	for (i = 0; i < ARRAY_SIZE(tp_proc_nodes_template); i++) {
+		tp_proc_nodes[i] = tp_proc_nodes_template[i];
+		/* Update fields that depend on ts */
+		if (tp_proc_nodes[i].data == NULL && (
+			strcmp(tp_proc_nodes[i].name, "debug_level") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "double_tap_enable") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "coordinate") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "game_switch_enable") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "irq_depth") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "oplus_tp_noise_modetest") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "tp_fw_update") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "oplus_register_info") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "incell_panel") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "fd_enable") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "event_num") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "fd_touch_count") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "fp_enable") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "baseline_test") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "black_screen_test") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "baseline_result") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "black_screen_result") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "oplus_tp_direction") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "report_rate_white_list") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "charge_detect") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "wireless_charge_detect") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "headset_detect") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "tp_aging_test") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "smooth_level") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "sensitive_level") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "double_tap_enable_indep") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "calibration") == 0 ||
+			strcmp(tp_proc_nodes[i].name, "calibration_status") == 0
 #ifdef CONFIG_OPLUS_TP_APK
-		{"oplus_apk", 0666, NULL, &proc_oplus_apk_fops, ts, false, true},
-#endif /* end of CONFIG_OPLUS_TP_APK*/
-	};
+			|| strcmp(tp_proc_nodes[i].name, "oplus_apk") == 0
+#endif
+			)) {
+			tp_proc_nodes[i].data = ts;
+		}
+	}
+	
+	/* Update the is_support field based on ts values */
+	for (i = 0; i < ARRAY_SIZE(tp_proc_nodes); i++) {
+		if (strcmp(tp_proc_nodes[i].name, "double_tap_enable") == 0) {
+			tp_proc_nodes[i].is_support = ts->black_gesture_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "coordinate") == 0) {
+			tp_proc_nodes[i].is_support = ts->black_gesture_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "game_switch_enable") == 0) {
+			tp_proc_nodes[i].is_support = ts->game_switch_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "oplus_tp_noise_modetest") == 0) {
+			tp_proc_nodes[i].is_support = ts->noise_modetest_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "incell_panel") == 0) {
+			tp_proc_nodes[i].is_support = ts->is_incell_panel;
+		} else if (strcmp(tp_proc_nodes[i].name, "fd_enable") == 0) {
+			tp_proc_nodes[i].is_support = ts->face_detect_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "event_num") == 0) {
+			tp_proc_nodes[i].is_support = ts->face_detect_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "fd_touch_count") == 0) {
+			tp_proc_nodes[i].is_support = ts->face_detect_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "fp_enable") == 0) {
+			tp_proc_nodes[i].is_support = ts->fingerprint_underscreen_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "black_screen_test") == 0) {
+			tp_proc_nodes[i].is_support = ts->gesture_test_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "black_screen_result") == 0) {
+			tp_proc_nodes[i].is_support = ts->gesture_test_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "oplus_tp_direction") == 0) {
+			tp_proc_nodes[i].is_support = ts->fw_edge_limit_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "report_rate_white_list") == 0) {
+			tp_proc_nodes[i].is_support = ts->report_rate_white_list_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "charge_detect") == 0) {
+			tp_proc_nodes[i].is_support = ts->charger_pump_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "wireless_charge_detect") == 0) {
+			tp_proc_nodes[i].is_support = ts->wireless_charger_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "headset_detect") == 0) {
+			tp_proc_nodes[i].is_support = ts->headset_pump_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "smooth_level") == 0) {
+			tp_proc_nodes[i].is_support = ts->smooth_level_array_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "sensitive_level") == 0) {
+			tp_proc_nodes[i].is_support = ts->sensitive_level_array_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "double_tap_enable_indep") == 0) {
+			tp_proc_nodes[i].is_support = ts->black_gesture_indep_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "calibration") == 0) {
+			tp_proc_nodes[i].is_support = ts->auto_test_need_cal_support;
+		} else if (strcmp(tp_proc_nodes[i].name, "calibration_status") == 0) {
+			tp_proc_nodes[i].is_support = ts->auto_test_need_cal_support;
+		}
+	}
 
 	TP_INFO(ts->tp_index, "%s entry\n", __func__);
 
@@ -3215,14 +3308,14 @@ int init_touchpanel_proc(struct touchpanel_data *ts)
 								tp_proc_nodes[i].mode,
 								prEntry_tp, tp_proc_nodes[i].fops, tp_proc_nodes[i].data);
 
-			if (tp_proc_node[i].node == NULL) {
-				tp_proc_node[i].is_created = false;
+			if (tp_proc_nodes[i].node == NULL) {
+				tp_proc_nodes[i].is_created = false;
 				TP_INFO(ts->tp_index, "%s: Couldn't create proc/debug_info/%s\n", __func__,
-					tp_proc_node[i].name);
+					tp_proc_nodes[i].name);
 				ret = -ENODEV;
 
 			} else {
-				tp_proc_node[i].is_created = true;
+				tp_proc_nodes[i].is_created = true;
 			}
 		}
 	}
