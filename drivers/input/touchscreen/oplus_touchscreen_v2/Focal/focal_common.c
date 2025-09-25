@@ -1451,7 +1451,7 @@ static int focal_read_limit_fw(struct seq_file *s, struct touchpanel_data *ts,
 	/*step4: decode the limit image*/
 	test_head = (struct auto_test_header *)fw->data;
 
-	TPD_INFO("%s, fw, magic1 = 0x%x, magic2 = 0x%x, test_item = 0x%x \n", __func__,
+	TPD_INFO("%s, fw, magic1 = 0x%x, magic2 = 0x%x, test_item = 0x%llx \n", __func__,
 		 test_head->magic1, test_head->magic2, test_head->test_item);
 	TPD_INFO("%s, fw.data = %p \n", __func__, fw->data);
 

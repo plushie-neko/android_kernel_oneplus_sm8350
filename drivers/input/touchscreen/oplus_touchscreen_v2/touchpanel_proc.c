@@ -2986,7 +2986,7 @@ static int init_debug_info_proc(struct touchpanel_data *ts)
 	int i = 0;
 	struct proc_dir_entry *prEntry_debug_info = NULL;
 
-	tp_proc_node proc_debug_node[] = {
+	static tp_proc_node proc_debug_node[] = {
 		{"data_limit", 0666, NULL, &tp_limit_data_proc_fops, ts, false, true},/* show limit data interface*/
 		{"baseline", 0666, NULL, &tp_baseline_data_proc_fops, ts, false, true},/* show baseline data interface*/
 		{"delta", 0666, NULL, &tp_delta_data_proc_fops, ts, false, true},/* show delta interface*/
@@ -3056,7 +3056,7 @@ int init_touchpanel_proc(struct touchpanel_data *ts)
 	struct proc_dir_entry *prEntry_tp = NULL;
 	char name[TP_NAME_SIZE_MAX];
 
-	tp_proc_node tp_proc_node[] = {
+	static tp_proc_node tp_proc_node[] = {
 		{
 			"oplus_optimized_time", 0666, NULL, &proc_optimized_time_fops, ts, false,
 			ts->optimized_show_support
