@@ -50,3 +50,8 @@ jobs:
           export PATH=$(pwd)/zyc-clang/bin/:$PATH
           make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang"
           make $KERNEL_CMDLINE CC="ccache clang" -j$(nproc --all)
+      - name: Upload Kernel-SU
+        uses: actions/upload-artifact@v4
+        with:
+          name: out-${{ steps.get_time.outputs.TIME }}
+          path: "out/*"
