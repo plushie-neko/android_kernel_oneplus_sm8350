@@ -34,6 +34,9 @@
 #include <linux/etherdevice.h>
 #include <linux/firmware.h>
 #include <linux/kernel.h>
+#include <linux/fs.h>
+#include <linux/cdev.h>
+#include <linux/device.h>
 #include <wlan_hdd_tx_rx.h>
 #include <wni_api.h>
 #include <wlan_hdd_cfg.h>
@@ -16992,6 +16995,55 @@ const struct file_operations wlan_hdd_state_fops = {
 	.write = wlan_hdd_state_ctrl_param_write,
 	.release = wlan_hdd_state_ctrl_param_release,
 };
+static int wlan_hdd_state_ctrl_param_create(void)
+{
+	int ret = 0;
+	dev_t dev;
+
+	ret = alloc_chrdev_region(&dev, 0, 1, "wlan");
+	if (ret) {
+		pr_err("Failed to allocate chrdev region: %d\n", ret);
+		return ret;
+	}
+
+	device = MKDEV(MAJOR(dev), 0);
+	dev_num = MINOR(dev);
+
+	cdev_init(&wlan_hdd_state_cdev, &wlan_hdd_state_fops);
+	wlan_hdd_state_cdev.owner = THIS_MODULE;
+
+	ret = cdev_add(&wlan_hdd_state_cdev, device, 1);
+	if (ret) {
+		pr_err("Failed to add cdev: %d\n", ret);
+		goto unregister_chrdev;
+	}
+
+	class = class_create(THIS_MODULE, "wlan_class");
+	if (IS_ERR(class)) {
+		ret = PTR_ERR(class);
+		pr_err("Failed to create class: %d\n", ret);
+		goto del_cdev;
+	}
+
+	device = device_create(class, NULL, dev, NULL, "wlan");
+	if (IS_ERR(device)) {
+		ret = PTR_ERR(device);
+		pr_err("Failed to create device: %d\n", ret);
+		goto destroy_class;
+	}
+
+	pr_info("Device node created successfully\n");
+	return 0;
+
+destroy_class:
+	class_destroy(class);
+del_cdev:
+	cdev_del(&wlan_hdd_state_cdev);
+unregister_chrdev:
+	unregister_chrdev_region(dev, 1);
+	return ret;
+}
+
 
 
 
