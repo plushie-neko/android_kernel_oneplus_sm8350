@@ -3056,7 +3056,7 @@ int init_touchpanel_proc(struct touchpanel_data *ts)
 	struct proc_dir_entry *prEntry_tp = NULL;
 	char name[TP_NAME_SIZE_MAX];
 
-	tp_proc_node tp_proc_node[] = {
+	static tp_proc_node tp_proc_nodes[] = {
 		{
 			"oplus_optimized_time", 0666, NULL, &proc_optimized_time_fops, NULL, false,
 			false
@@ -3209,11 +3209,11 @@ int init_touchpanel_proc(struct touchpanel_data *ts)
 
 	ts->prEntry_tp = prEntry_tp;
 
-	for (i = 0; i < ARRAY_SIZE(tp_proc_node); i++) {
-		if (tp_proc_node[i].is_support) {
-			tp_proc_node[i].node = proc_create_data(tp_proc_node[i].name,
-								tp_proc_node[i].mode,
-								prEntry_tp, tp_proc_node[i].fops, tp_proc_node[i].data);
+	for (i = 0; i < ARRAY_SIZE(tp_proc_nodes); i++) {
+		if (tp_proc_nodes[i].is_support) {
+			tp_proc_nodes[i].node = proc_create_data(tp_proc_nodes[i].name,
+								tp_proc_nodes[i].mode,
+								prEntry_tp, tp_proc_nodes[i].fops, tp_proc_nodes[i].data);
 
 			if (tp_proc_node[i].node == NULL) {
 				tp_proc_node[i].is_created = false;
