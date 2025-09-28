@@ -5076,9 +5076,9 @@ static const char * const smblib_typec_mode_name[] = {
 	[QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH]	  = "SOURCE_HIGH",
 	[QTI_POWER_SUPPLY_TYPEC_NON_COMPLIANT]	  = "NON_COMPLIANT",
 	[QTI_POWER_SUPPLY_TYPEC_SINK]		  = "SINK",
-	[QTI_QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE]   = "SINK_POWERED_CABLE",
+	[QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE]   = "SINK_POWERED_CABLE",
 	[QTI_POWER_SUPPLY_TYPEC_SINK_DEBUG_ACCESSORY] = "SINK_DEBUG_ACCESSORY",
-	[QTI_QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER]   = "SINK_AUDIO_ADAPTER",
+	[QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER]   = "SINK_AUDIO_ADAPTER",
 	[QTI_POWER_SUPPLY_TYPEC_POWERED_CABLE_ONLY]   = "POWERED_CABLE_ONLY",
 };
 
@@ -5156,11 +5156,11 @@ if (rc < 0) {
 #ifdef OPLUS_CUSTOM_OP_DEF
 		chg->is_audio_adapter = true;
 #endif
-		return QTI_QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER;
+		return QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER;
 	case SRC_DEBUG_ACCESS_BIT:
 		return QTI_POWER_SUPPLY_TYPEC_SINK_DEBUG_ACCESSORY;
 	case SRC_RD_RA_VCONN_BIT:
-		return QTI_QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE;
+		return QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE;
 	case SRC_RD_OPEN_BIT:
 		return QTI_POWER_SUPPLY_TYPEC_SINK;
 	default:
@@ -5986,7 +5986,7 @@ int smblib_set_prop_typec_power_role(struct smb_charger *chg,
 
 	typec_mode = smblib_get_prop_typec_mode(chg);
 	if (typec_mode >= QTI_POWER_SUPPLY_TYPEC_SINK &&
-			typec_mode <= QTI_QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER)
+			typec_mode <= QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER)
 		snk_attached = true;
 	else if (typec_mode >= QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT &&
 			typec_mode <= QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH)
@@ -6721,7 +6721,7 @@ irqreturn_t usbin_uv_irq_handler(int irq, void *data)
 #ifdef OPLUS_FEATURE_CHG_BASIC
 	if (oplus_is_use_external_boost()) {
 		if (chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK ||
-		    chg->typec_mode == QTI_QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE) {
+		    chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE) {
 			pr_info("%s:chg->typec_mode = sink return!\n", __func__);
 			return IRQ_HANDLED;
 		}
@@ -7377,7 +7377,7 @@ irqreturn_t usb_plugin_irq_handler(int irq, void *data)
 
 	if (oplus_is_use_external_boost() || (chip->vbatt_num == 2)) {
 		if (chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK ||
-		    chg->typec_mode == QTI_QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE) {
+		    chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE) {
 			pr_info("%s:chg->typec_mode = sink return!\n", __func__);
 			return IRQ_HANDLED;
 		}
@@ -7486,7 +7486,7 @@ static void update_sw_icl_max(struct smb_charger *chg, int pst)
 	if (chg->pd_active)
 		return;
 
-	if (chg->typec_mode == QTI_QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER) {
+	if (chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER) {
 		vote(chg->usb_icl_votable, SW_ICL_MAX_VOTER, true, 500000);
 		return;
 	}
@@ -7627,7 +7627,7 @@ irqreturn_t usb_source_change_irq_handler(int irq, void *data)
 
 	if (oplus_is_use_external_boost() || (chip->vbatt_num == 2)) {
 		if (chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK ||
-		    chg->typec_mode == QTI_QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE) {
+		    chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE) {
 			pr_info("%s:chg->typec_mode = sink return!\n", __func__);
 			return IRQ_HANDLED;
 		}
@@ -8246,7 +8246,7 @@ irqreturn_t typec_state_change_irq_handler(int irq, void *data)
 
 #ifdef OPLUS_FEATURE_CHG_BASIC//Fanhong.Kong@ProDrv.CHG,add 2018/06/02 for SVOOC OTG
 	if (oplus_is_use_external_boost() || (chip->vbatt_num == 2)) {
-		if (chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK || chg->typec_mode == QTI_QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE) {
+		if (chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK || chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE) {
 			pr_info("%s: chg->typec_mode = SINK,Disable APSD!\n", __func__);
 			smblib_apsd_enable(chg, false);
 		}
@@ -8337,7 +8337,7 @@ if (rc < 0) {
 		}
 
 		if (smblib_get_prop_dfp_mode(chg) ==
-				QTI_QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER) {
+				QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER) {
 			chg->sink_src_mode = AUDIO_ACCESS_MODE;
 			typec_ra_ra_insertion(chg);
 		} else if (stat & SNK_SRC_MODE_BIT) {
@@ -16346,7 +16346,7 @@ aicl_suspend:
 	goto aicl_return;
 aicl_return:
 	/*FORCE icl 500mA for AUDIO_ADAPTER combo cable*/
-	if (chip->pmic_spmi.smb5_chip->chg.typec_mode == QTI_QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER) {
+	if (chip->pmic_spmi.smb5_chip->chg.typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER) {
 		chg_debug( "AUDIO ADAPTER MODE\n");
 		rc = smblib_read(&chip->pmic_spmi.smb5_chip->chg, USBIN_LOAD_CFG_REG, &stat);
 if (rc < 0) {
@@ -16628,7 +16628,7 @@ bool oplus_chg_is_usb_present(void)
 
 #ifdef OPLUS_FEATURE_CHG_BASIC//Fanhong.Kong@ProDrv.CHG,add 2018/06/02 for SVOOC OTG
 	if ((chip->pmic_spmi.smb5_chip->chg.typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK
-		|| chip->pmic_spmi.smb5_chip->chg.typec_mode == QTI_QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE)
+		|| chip->pmic_spmi.smb5_chip->chg.typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE)
 		&& chip->vbatt_num == 2
 		&& oplus_wpc_get_wireless_charge_start() == false
 		&& oplus_vooc_get_fastchg_started() == false
