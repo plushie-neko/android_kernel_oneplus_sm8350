@@ -13,6 +13,7 @@
 #include <linux/regulator/driver.h>
 #include <linux/regulator/consumer.h>
 #include <linux/extcon-provider.h>
+#include <linux/qti_power_supply.h>
 #include "../../../../drivers/power/supply/qcom/storm-watch.h"
 #include "../../../../drivers/power/supply/qcom/battery.h"
 

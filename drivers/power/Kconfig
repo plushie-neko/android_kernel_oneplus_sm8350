@@ -16,9 +16,10 @@ config OPLUS_SM8350_CHARGER
 	  Enables support for the sm8350 charging
 
 config OPLUS_SM8250_CHARGER
-	bool "OPLUS SM8250 charger driver"
+	tristate "OPLUS SM8150 charger driver"
+	depends on MFD_SPMI_PMIC
 	help
-	  Enables support for the sm8350 charging
+	  Enables support for the oplus charging framework
 
 config OPLUS_SHORT_C_BATT_CHECK
 	bool "OPLUS_SHORT_C_BATT CHECK SUPPORT"

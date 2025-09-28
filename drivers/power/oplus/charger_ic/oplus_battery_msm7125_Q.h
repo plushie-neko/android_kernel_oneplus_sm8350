@@ -14,6 +14,7 @@
 #include <linux/regulator/driver.h>
 #include <linux/regulator/consumer.h>
 #include <linux/extcon.h>
+#include <linux/qti_power_supply.h>
 
 /****************************************************/
 #ifndef OPLUS_FEATURE_CHG_BASIC
