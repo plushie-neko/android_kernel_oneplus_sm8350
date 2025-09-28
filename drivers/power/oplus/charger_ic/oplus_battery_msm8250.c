@@ -562,7 +562,7 @@ irqreturn_t oplus_wired_conn_change_handler(int irq, void *data)
 	struct smb_charger *chg = &chip->pmic_spmi.smb5_chip->chg;
 	//struct oplus_chg_chip *chip = g_oplus_chip;
 
-	if ((chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK || chg->typec_mode == QTI_QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE)
+	if ((chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK || chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE)
 			&& chip->vbatt_num == 2) {
 		pr_info("%s:chg->typec_mode = sink return!\n", __func__);
 		return IRQ_HANDLED;
@@ -1588,7 +1588,7 @@ int smblib_set_opt_switcher_freq(struct smb_charger *chg, int fsw_khz)
 		 * with a fixed frequency
 		 */
 		power_supply_set_property(chg->pl.psy,
-				POWER_SUPPLY_PROP_BUCK_FREQ, &pval);
+				POWER_SUPPLY_PROP_CP_ISNS, &pval);
 	}
 
 	return rc;
@@ -2532,13 +2532,13 @@ void smblib_suspend_on_debug_battery(struct smb_charger *chg)
 	rc = smblib_get_prop_from_bms(chg,
 			POWER_SUPPLY_PROP_DEBUG_BATTERY, &val);
 
-if (rc < 0) {
+	if (rc < 0) {
 		smblib_err(chg, "Couldn't get debug battery prop rc=%d\n", rc);
 		return;
 	}
-	if (chg->suspend_input_on_debug_batt) {
-		vote(chg->usb_icl_votable, DEBUG_BOARD_VOTER, val.intval, 0);
-		vote(chg->dc_suspend_votable, DEBUG_BOARD_VOTER, val.intval, 0);
+		if (chg->suspend_input_on_debug_batt) {
+			vote(chg->usb_icl_votable, DEBUG_BOARD_VOTER, val.intval, 0);
+			vote(chg->dc_suspend_votable, DEBUG_BOARD_VOTER, val.intval, 0);
 		if (val.intval)
 			pr_info("Input suspended: Fake battery\n");
 	} else {
@@ -2708,7 +2708,7 @@ if (rc < 0) {
 	/* configure current */
 	if (chg->real_charger_type == POWER_SUPPLY_TYPE_USB
 		&& (chg->typec_legacy
-		|| chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_DEFAULT
+		|| chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT
 		|| chg->connector_type == QTI_POWER_SUPPLY_CONNECTOR_MICRO_USB)) {
 		rc = set_sdp_current(chg, icl_ua);
 if (rc < 0) {
