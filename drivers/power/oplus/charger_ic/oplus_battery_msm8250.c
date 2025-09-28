@@ -922,8 +922,8 @@ void oplus_dcin_irq_enable(bool enable)
 
 
 #define typec_rp_med_high(chg, typec_mode)			\
-	((typec_mode == POWER_SUPPLY_TYPEC_SOURCE_MEDIUM	\
-	|| typec_mode == POWER_SUPPLY_TYPEC_SOURCE_HIGH)	\
+	((typec_mode == QTI_POWER_SUPPLY_TYPEC_SOURCE_MEDIUM	\
+	|| typec_mode == QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH)	\
 	&& (!chg->typec_legacy || chg->typec_legacy_use_rp_icl))
 
 static void update_sw_icl_max(struct smb_charger *chg, int pst);
@@ -2526,7 +2526,7 @@ static void smblib_uusb_removal(struct smb_charger *chg)
 
 void smblib_suspend_on_debug_battery(struct smb_charger *chg)
 {
-	int rc;
+	int rc = 0;
 	union power_supply_propval val;
 
 /*
@@ -3365,8 +3365,10 @@ int smblib_get_prop_batt_status(struct smb_charger *chg,
 	u8 stat;
 	int rc, suspend = 0;
 
+/*
 	rc = smblib_get_prop_from_bms(chg,
 			POWER_SUPPLY_PROP_DEBUG_BATTERY, &pval);
+*/
 
 if (rc < 0) {
 		pr_err_ratelimited("Couldn't get debug battery prop rc=%d\n",
@@ -4700,9 +4702,9 @@ int smblib_get_usb_online(struct smb_charger *chg,
 	if (!val->intval)
 		goto exit;
 
-	if (((chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_DEFAULT) ||
-		(chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_MEDIUM) ||
-		(chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_HIGH) ||
+	if (((chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT) ||
+		(chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SOURCE_MEDIUM) ||
+		(chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH) ||
 		(chg->connector_type == QTI_POWER_SUPPLY_CONNECTOR_MICRO_USB))
 		&& (chg->real_charger_type == POWER_SUPPLY_TYPE_USB))
 		val->intval = 1;
@@ -4911,11 +4913,12 @@ if (rc < 0) {
 
 restore_adc_config:
 	 /* Restore ADC channel config */
-	if (chg->wa_flags & USBIN_ADC_WA)
+	if (chg->wa_flags & USBIN_ADC_WA) {
 		rc = smblib_write(chg, BATIF_ADC_CHANNEL_EN_REG, reg);
 		if (rc < 0)
 			smblib_err(chg, "Couldn't write ADC config rc=%d\n",
 						rc);
+	}
 
 unlock:
 	mutex_unlock(&chg->adc_lock);
@@ -5067,11 +5070,11 @@ if (rc < 0) {
 }
 
 static const char * const smblib_typec_mode_name[] = {
-	[POWER_SUPPLY_TYPEC_NONE]		  = "NONE",
-	[POWER_SUPPLY_TYPEC_SOURCE_DEFAULT]	  = "SOURCE_DEFAULT",
-	[POWER_SUPPLY_TYPEC_SOURCE_MEDIUM]	  = "SOURCE_MEDIUM",
-	[POWER_SUPPLY_TYPEC_SOURCE_HIGH]	  = "SOURCE_HIGH",
-	[POWER_SUPPLY_TYPEC_NON_COMPLIANT]	  = "NON_COMPLIANT",
+	[QTI_POWER_SUPPLY_TYPEC_NONE]		  = "NONE",
+	[QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT]	  = "SOURCE_DEFAULT",
+	[QTI_POWER_SUPPLY_TYPEC_SOURCE_MEDIUM]	  = "SOURCE_MEDIUM",
+	[QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH]	  = "SOURCE_HIGH",
+	[QTI_POWER_SUPPLY_TYPEC_NON_COMPLIANT]	  = "NON_COMPLIANT",
 	[QTI_POWER_SUPPLY_TYPEC_SINK]		  = "SINK",
 	[QTI_QTI_POWER_SUPPLY_TYPEC_SINK_POWERED_CABLE]   = "SINK_POWERED_CABLE",
 	[QTI_POWER_SUPPLY_TYPEC_SINK_DEBUG_ACCESSORY] = "SINK_DEBUG_ACCESSORY",
@@ -5088,14 +5091,16 @@ static int smblib_get_prop_ufp_mode(struct smb_charger *chg)
 
 if (rc < 0) {
 		smblib_err(chg, "Couldn't read TYPE_C_STATUS_1 rc=%d\n", rc);
-		return POWER_SUPPLY_TYPEC_NONE;
+		return QTI_POWER_SUPPLY_TYPEC_NONE;
 	}
 	smblib_dbg(chg, PR_REGISTER, "TYPE_C_STATUS_1 = 0x%02x\n", stat);
 
 #ifdef OPLUS_FEATURE_CHG_BASIC
 	/* config 0x154A to 0x17 */
 	if (stat & (SNK_DAM_500MA_BIT | SNK_DAM_1500MA_BIT | SNK_DAM_3000MA_BIT)) {
+/*
 		rc = smblib_masked_write(chg, DEBUG_ACCESS_SNK_CFG_REG, 0x1f, 0x17);
+*/
 		if (rc < 0)
 			smblib_err(chg, "Couldn't config DEBUG_ACCESS_SNK_CFG_REG rc=%d\n", rc);
 	}
@@ -5106,27 +5111,27 @@ if (rc < 0) {
 #ifdef OPLUS_FEATURE_CHG_BASIC
 	case SNK_DAM_500MA_BIT:
 #endif
-		return POWER_SUPPLY_TYPEC_SOURCE_DEFAULT;
+		return QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT;
 
 	case SNK_RP_1P5_BIT:
 #ifdef OPLUS_FEATURE_CHG_BASIC
 	case SNK_DAM_1500MA_BIT:
 #endif
-		return POWER_SUPPLY_TYPEC_SOURCE_MEDIUM;
+		return QTI_POWER_SUPPLY_TYPEC_SOURCE_MEDIUM;
 
 	case SNK_RP_3P0_BIT:
 #ifdef OPLUS_FEATURE_CHG_BASIC
 	case SNK_DAM_3000MA_BIT:
 #endif
-		return POWER_SUPPLY_TYPEC_SOURCE_HIGH;
+		return QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH;
 
 	case SNK_RP_SHORT_BIT:
-		return POWER_SUPPLY_TYPEC_NON_COMPLIANT;
+		return QTI_POWER_SUPPLY_TYPEC_NON_COMPLIANT;
 	default:
 		break;
 	}
 
-	return POWER_SUPPLY_TYPEC_NONE;
+	return QTI_POWER_SUPPLY_TYPEC_NONE;
 }
 
 static int smblib_get_prop_dfp_mode(struct smb_charger *chg)
@@ -5135,14 +5140,14 @@ static int smblib_get_prop_dfp_mode(struct smb_charger *chg)
 	u8 stat;
 
 	if (chg->lpd_stage == LPD_STAGE_COMMIT)
-		return POWER_SUPPLY_TYPEC_NONE;
+		return QTI_POWER_SUPPLY_TYPEC_NONE;
 
 	rc = smblib_read(chg, TYPE_C_SRC_STATUS_REG, &stat);
 
 if (rc < 0) {
 		smblib_err(chg, "Couldn't read TYPE_C_SRC_STATUS_REG rc=%d\n",
 				rc);
-		return POWER_SUPPLY_TYPEC_NONE;
+		return QTI_POWER_SUPPLY_TYPEC_NONE;
 	}
 	smblib_dbg(chg, PR_REGISTER, "TYPE_C_SRC_STATUS_REG = 0x%02x\n", stat);
 
@@ -5162,7 +5167,7 @@ if (rc < 0) {
 		break;
 	}
 
-	return POWER_SUPPLY_TYPEC_NONE;
+	return QTI_POWER_SUPPLY_TYPEC_NONE;
 }
 
 static int smblib_get_prop_typec_mode(struct smb_charger *chg)
@@ -5193,7 +5198,7 @@ inline int smblib_get_usb_prop_typec_mode(struct smb_charger *chg,
 				union power_supply_propval *val)
 {
 	if (chg->connector_type == QTI_POWER_SUPPLY_CONNECTOR_MICRO_USB)
-		val->intval = POWER_SUPPLY_TYPEC_NONE;
+		val->intval = QTI_POWER_SUPPLY_TYPEC_NONE;
 	else
 		val->intval = chg->typec_mode;
 
@@ -5207,7 +5212,7 @@ int smblib_get_prop_typec_power_role(struct smb_charger *chg,
 	u8 ctrl;
 
 	if (chg->connector_type == QTI_POWER_SUPPLY_CONNECTOR_MICRO_USB) {
-		val->intval = POWER_SUPPLY_TYPEC_PR_NONE;
+		val->intval = QTI_POWER_SUPPLY_TYPEC_PR_NONE;
 		return 0;
 	}
 
@@ -5222,22 +5227,22 @@ if (rc < 0) {
 		   ctrl);
 
 	if (ctrl & TYPEC_DISABLE_CMD_BIT) {
-		val->intval = POWER_SUPPLY_TYPEC_PR_NONE;
+		val->intval = QTI_POWER_SUPPLY_TYPEC_PR_NONE;
 		return rc;
 	}
 
 	switch (ctrl & (EN_SRC_ONLY_BIT | EN_SNK_ONLY_BIT)) {
 	case 0:
-		val->intval = POWER_SUPPLY_TYPEC_PR_DUAL;
+		val->intval = QTI_POWER_SUPPLY_TYPEC_PR_DUAL;
 		break;
 	case EN_SRC_ONLY_BIT:
-		val->intval = POWER_SUPPLY_TYPEC_PR_SOURCE;
+		val->intval = QTI_POWER_SUPPLY_TYPEC_PR_SOURCE;
 		break;
 	case EN_SNK_ONLY_BIT:
-		val->intval = POWER_SUPPLY_TYPEC_PR_SINK;
+		val->intval = QTI_POWER_SUPPLY_TYPEC_PR_SINK;
 		break;
 	default:
-		val->intval = POWER_SUPPLY_TYPEC_PR_NONE;
+		val->intval = QTI_POWER_SUPPLY_TYPEC_PR_NONE;
 		smblib_err(chg, "unsupported power role 0x%02lx\n",
 			ctrl & (EN_SRC_ONLY_BIT | EN_SNK_ONLY_BIT));
 		return -EINVAL;
@@ -5249,8 +5254,8 @@ if (rc < 0) {
 
 static inline bool typec_in_src_mode(struct smb_charger *chg)
 {
-	return (chg->typec_mode > POWER_SUPPLY_TYPEC_NONE &&
-		chg->typec_mode < POWER_SUPPLY_TYPEC_SOURCE_DEFAULT);
+	return (chg->typec_mode > QTI_POWER_SUPPLY_TYPEC_NONE &&
+		chg->typec_mode < QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT);
 }
 
 int smblib_get_prop_typec_select_rp(struct smb_charger *chg,
@@ -5272,14 +5277,14 @@ if (rc < 0) {
 
 	switch (stat & TYPEC_SRC_RP_SEL_MASK) {
 	case TYPEC_SRC_RP_STD:
-		rp = POWER_SUPPLY_TYPEC_SRC_RP_STD;
+		rp = QTI_POWER_SUPPLY_TYPEC_SRC_RP_STD;
 		break;
 	case TYPEC_SRC_RP_1P5A:
-		rp = POWER_SUPPLY_TYPEC_SRC_RP_1P5A;
+		rp = QTI_POWER_SUPPLY_TYPEC_SRC_RP_1P5A;
 		break;
 	case TYPEC_SRC_RP_3A:
 	case TYPEC_SRC_RP_3A_DUPLICATE:
-		rp = POWER_SUPPLY_TYPEC_SRC_RP_3A;
+		rp = QTI_POWER_SUPPLY_TYPEC_SRC_RP_3A;
 		break;
 	default:
 		return -EINVAL;
@@ -5336,7 +5341,7 @@ if (rc < 0) {
 		}
 
 		if (chg->otg_present || smblib_get_prop_dfp_mode(chg) !=
-				POWER_SUPPLY_TYPEC_NONE) {
+				QTI_POWER_SUPPLY_TYPEC_NONE) {
 			val->intval = DIV_ROUND_CLOSEST(val->intval * 100,
 								boost_scale);
 			return rc;
@@ -5681,11 +5686,11 @@ static int get_rp_based_dcp_current(struct smb_charger *chg, int typec_mode)
 	int rp_ua;
 
 	switch (typec_mode) {
-	case POWER_SUPPLY_TYPEC_SOURCE_HIGH:
+	case QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH:
 		rp_ua = TYPEC_HIGH_CURRENT_UA;
 		break;
-	case POWER_SUPPLY_TYPEC_SOURCE_MEDIUM:
-	case POWER_SUPPLY_TYPEC_SOURCE_DEFAULT:
+	case QTI_POWER_SUPPLY_TYPEC_SOURCE_MEDIUM:
+	case QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT:
 	/* fall through */
 	default:
 		rp_ua = DCP_CURRENT_UA;
@@ -5904,7 +5909,7 @@ int smblib_set_prop_reset_rd(struct smb_charger *chg,
 	int rc;
 	u8 stat;
 
-	if (!(chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_HIGH)) {
+	if (!(chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH)) {
 		smblib_err(chg, "Not in source high mode, do not reset rd!\n");
 		return -EINVAL;
 	}
@@ -5983,8 +5988,8 @@ int smblib_set_prop_typec_power_role(struct smb_charger *chg,
 	if (typec_mode >= QTI_POWER_SUPPLY_TYPEC_SINK &&
 			typec_mode <= QTI_QTI_POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER)
 		snk_attached = true;
-	else if (typec_mode >= POWER_SUPPLY_TYPEC_SOURCE_DEFAULT &&
-			typec_mode <= POWER_SUPPLY_TYPEC_SOURCE_HIGH)
+	else if (typec_mode >= QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT &&
+			typec_mode <= QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH)
 		src_attached = true;
 
 	/*
@@ -5994,9 +5999,9 @@ int smblib_set_prop_typec_power_role(struct smb_charger *chg,
 	 * related interrupts for locking power role to avoid the redundant
 	 * notifications.
 	 */
-	if ((chg->power_role == POWER_SUPPLY_TYPEC_PR_DUAL) &&
-		((src_attached && val->intval == POWER_SUPPLY_TYPEC_PR_SINK) ||
-		(snk_attached && val->intval == POWER_SUPPLY_TYPEC_PR_SOURCE)))
+	if ((chg->power_role == QTI_POWER_SUPPLY_TYPEC_PR_DUAL) &&
+		((src_attached && val->intval == QTI_POWER_SUPPLY_TYPEC_PR_SINK) ||
+		(snk_attached && val->intval == QTI_POWER_SUPPLY_TYPEC_PR_SOURCE)))
 		is_pr_lock = true;
 
 	smblib_dbg(chg, PR_MISC, "snk_attached = %d, src_attached = %d, is_pr_lock = %d\n",
@@ -6017,16 +6022,16 @@ int smblib_set_prop_typec_power_role(struct smb_charger *chg,
 	spin_unlock(&chg->typec_pr_lock);
 
 	switch (val->intval) {
-	case POWER_SUPPLY_TYPEC_PR_NONE:
+	case QTI_POWER_SUPPLY_TYPEC_PR_NONE:
 		power_role = TYPEC_DISABLE_CMD_BIT;
 		break;
-	case POWER_SUPPLY_TYPEC_PR_DUAL:
+	case QTI_POWER_SUPPLY_TYPEC_PR_DUAL:
 		power_role = chg->typec_try_mode;
 		break;
-	case POWER_SUPPLY_TYPEC_PR_SINK:
+	case QTI_POWER_SUPPLY_TYPEC_PR_SINK:
 		power_role = EN_SNK_ONLY_BIT;
 		break;
-	case POWER_SUPPLY_TYPEC_PR_SOURCE:
+	case QTI_POWER_SUPPLY_TYPEC_PR_SOURCE:
 		power_role = EN_SRC_ONLY_BIT;
 		break;
 	default:
@@ -6510,7 +6515,7 @@ if (rc < 0) {
 	}
 
 	switch (typec_source_rd) {
-	case POWER_SUPPLY_TYPEC_SOURCE_DEFAULT:
+	case QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT:
 		switch (apsd_result->bit) {
 		case CDP_CHARGER_BIT:
 			current_ua = CDP_CURRENT_UA;
@@ -6525,14 +6530,14 @@ if (rc < 0) {
 			break;
 		}
 		break;
-	case POWER_SUPPLY_TYPEC_SOURCE_MEDIUM:
+	case QTI_POWER_SUPPLY_TYPEC_SOURCE_MEDIUM:
 		current_ua = TYPEC_MEDIUM_CURRENT_UA;
 		break;
-	case POWER_SUPPLY_TYPEC_SOURCE_HIGH:
+	case QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH:
 		current_ua = TYPEC_HIGH_CURRENT_UA;
 		break;
-	case POWER_SUPPLY_TYPEC_NON_COMPLIANT:
-	case POWER_SUPPLY_TYPEC_NONE:
+	case QTI_POWER_SUPPLY_TYPEC_NON_COMPLIANT:
+	case QTI_POWER_SUPPLY_TYPEC_NONE:
 	default:
 		current_ua = 0;
 		break;
@@ -7020,7 +7025,7 @@ if (rc < 0) {
 	if (chg->fake_typec_insertion == true && !vbus_rising) {
 		printk(KERN_ERR "!!! %s: fake typec unplug\n", __func__);
 		chg->fake_typec_insertion = false;
-		chg->typec_mode = POWER_SUPPLY_TYPEC_NONE;
+		chg->typec_mode = QTI_POWER_SUPPLY_TYPEC_NONE;
 	}
 #endif
 
@@ -7136,7 +7141,7 @@ if (rc < 0) {
 		cancel_delayed_work_sync(&chg->pr_swap_detach_work);
 		vote(chg->awake_votable, DETACH_DETECT_VOTER, false, 0);
 #ifdef OPLUS_FEATURE_CHG_BASIC
-		if (smblib_get_prop_dfp_mode(chg) != POWER_SUPPLY_TYPEC_NONE) {
+		if (smblib_get_prop_dfp_mode(chg) != QTI_POWER_SUPPLY_TYPEC_NONE) {
 			chg->fake_usb_insertion = true;
 			return;
 		}
@@ -7328,7 +7333,7 @@ if (rc < 0) {
 	if (chg->fake_typec_insertion == true && !vbus_rising) {
 		printk(KERN_ERR "!!! %s: fake typec unplug\n", __func__);
 		chg->fake_typec_insertion = false;
-		chg->typec_mode = POWER_SUPPLY_TYPEC_NONE;
+		chg->typec_mode = QTI_POWER_SUPPLY_TYPEC_NONE;
 	}
 #endif
 
@@ -7726,7 +7731,7 @@ enum alarmtimer_restart smblib_lpd_recheck_timer(struct alarm *alarm,
 	int rc;
 
 	if (chg->lpd_reason == LPD_MOISTURE_DETECTED) {
-		pval.intval = POWER_SUPPLY_TYPEC_PR_DUAL;
+		pval.intval = QTI_POWER_SUPPLY_TYPEC_PR_DUAL;
 		rc = smblib_set_prop_typec_power_role(chg, &pval);
 if (rc < 0) {
 			smblib_err(chg, "Couldn't write 0x%02x to TYPE_C_INTRPT_ENB_SOFTWARE_CTRL rc=%d\n",
@@ -7793,7 +7798,7 @@ if (rc < 0) {
 
 	if (lpd_flag) {
 		chg->lpd_stage = LPD_STAGE_COMMIT;
-		pval.intval = POWER_SUPPLY_TYPEC_PR_SINK;
+		pval.intval = QTI_POWER_SUPPLY_TYPEC_PR_SINK;
 		rc = smblib_set_prop_typec_power_role(chg, &pval);
 		if (rc < 0)
 			smblib_err(chg, "Couldn't write 0x%02x to TYPE_C_INTRPT_ENB_SOFTWARE_CTRL rc=%d\n",
@@ -8230,7 +8235,7 @@ irqreturn_t typec_state_change_irq_handler(int irq, void *data)
 	chg->typec_mode = typec_mode;
 #ifdef OPLUS_CUSTOM_OP_DEF
 	if (wireless_present) {
-		if (typec_mode == POWER_SUPPLY_TYPEC_NONE) // If nothing connected enable bypass vsafe for OTG detection
+		if (typec_mode == QTI_POWER_SUPPLY_TYPEC_NONE) // If nothing connected enable bypass vsafe for OTG detection
 			smblib_bypass_vsafe0_control(chg, 1);
 		else // Disable Bypass vsafe after cc detection
 			smblib_bypass_vsafe0_control(chg, 0);
@@ -8255,7 +8260,7 @@ irqreturn_t typec_state_change_irq_handler(int irq, void *data)
 		dfp_status = current_status;
 		printk(KERN_ERR "!!!!! smblib_handle_typec_cc_state_change: [%d], mode[%d]\n", dfp_status, chg->typec_mode);
 	}
-	if (chg->typec_mode != POWER_SUPPLY_TYPEC_NONE) {
+	if (chg->typec_mode != QTI_POWER_SUPPLY_TYPEC_NONE) {
 		oplus_wake_up_usbtemp_thread();
 	} else {
 		if (chip)
@@ -8265,12 +8270,12 @@ irqreturn_t typec_state_change_irq_handler(int irq, void *data)
 
 #ifdef OPLUS_FEATURE_CHG_BASIC
 	if (chg->typec_present == false && gpio_get_value(chg->ccdetect_gpio) == 1)
-		if (oplus_ccdetect_get_power_role() != POWER_SUPPLY_TYPEC_PR_SINK
+		if (oplus_ccdetect_get_power_role() != QTI_POWER_SUPPLY_TYPEC_PR_SINK
 				&& oplus_get_otg_switch_status() == false)
 			oplus_ccdetect_disable();
 #endif
 #ifdef OPLUS_FEATURE_CHG_BASIC
-	if (chg->typec_mode != POWER_SUPPLY_TYPEC_NONE) {
+	if (chg->typec_mode != QTI_POWER_SUPPLY_TYPEC_NONE) {
 		cancel_delayed_work(&chg->typec_disable_cmd_work);
 	}
 #endif
@@ -9025,7 +9030,7 @@ if (rc < 0) {
 			smblib_err(chg, "Couldn't enable DRP rc=%d\n", rc);
 			return rc;
 		}
-		chg->power_role = POWER_SUPPLY_TYPEC_PR_DUAL;
+		chg->power_role = QTI_POWER_SUPPLY_TYPEC_PR_DUAL;
 		smblib_dbg(chg, PR_MISC, "restore power role: %d\n",
 				chg->power_role);
 	}
@@ -9063,7 +9068,7 @@ static void oplus_ccdetect_work(struct work_struct *work)
 		oplus_wake_up_usbtemp_thread();
 	} else {
 		oplus_chg_clear_abnormal_adapter_var();
-		if (oplus_ccdetect_get_power_role() != POWER_SUPPLY_TYPEC_PR_SINK
+		if (oplus_ccdetect_get_power_role() != QTI_POWER_SUPPLY_TYPEC_PR_SINK
 				&& oplus_get_otg_switch_status() == false)
 			oplus_ccdetect_disable();
 #ifdef OPLUS_FEATURE_CHG_BASIC
@@ -9644,7 +9649,7 @@ if (rc < 0) {
 	chg->lpd_stage = LPD_STAGE_COMMIT;
 
 	/* Enable source only mode */
-	pval.intval = POWER_SUPPLY_TYPEC_PR_SOURCE;
+	pval.intval = QTI_POWER_SUPPLY_TYPEC_PR_SOURCE;
 	rc = smblib_set_prop_typec_power_role(chg, &pval);
 
 if (rc < 0) {
@@ -9658,7 +9663,7 @@ if (rc < 0) {
 
 	if (smblib_rsbux_low(chg, RSBU_K_300K_UV)) {
 		/* Moisture detected, enable sink only mode */
-		pval.intval = POWER_SUPPLY_TYPEC_PR_SINK;
+		pval.intval = QTI_POWER_SUPPLY_TYPEC_PR_SINK;
 		rc = smblib_set_prop_typec_power_role(chg, &pval);
 if (rc < 0) {
 			smblib_err(chg, "Couldn't set typec sink only rc=%d\n",
@@ -9688,7 +9693,7 @@ if (rc < 0) {
 		}
 
 		/* restore DRP mode */
-		pval.intval = POWER_SUPPLY_TYPEC_PR_DUAL;
+		pval.intval = QTI_POWER_SUPPLY_TYPEC_PR_DUAL;
 		rc = smblib_set_prop_typec_power_role(chg, &pval);
 if (rc < 0) {
 			smblib_err(chg, "Couldn't write 0x%02x to TYPE_C_INTRPT_ENB_SOFTWARE_CTRL rc=%d\n",
@@ -9801,7 +9806,7 @@ static void typec_disable_cmd_work(struct work_struct *work)
 	}
 #endif
 
-	if (smblib_get_prop_typec_mode(chg) != POWER_SUPPLY_TYPEC_NONE) {
+	if (smblib_get_prop_typec_mode(chg) != QTI_POWER_SUPPLY_TYPEC_NONE) {
 		printk(KERN_ERR "!!! %s: active t-c module\n", __func__);
 		return;
 	}
@@ -9819,14 +9824,14 @@ static void typec_disable_cmd_work(struct work_struct *work)
 	printk(KERN_ERR "!!! %s: re-active t-c module\n", __func__);
 
 	msleep(200);
-	if (smblib_get_prop_typec_mode(chg) == POWER_SUPPLY_TYPEC_NONE) {
+	if (smblib_get_prop_typec_mode(chg) == QTI_POWER_SUPPLY_TYPEC_NONE) {
 		printk(KERN_ERR "!!! %s: fake typec plug\n", __func__);
 		rc = smblib_masked_write(chg, TYPE_C_CFG_REG, APSD_START_ON_CC_BIT, 0);
 		if (rc < 0)
 			smblib_err(chg, "Couldn't enable APSD_START_ON_CC rc=%d\n", rc);
 		msleep(600);
 		chg->fake_typec_insertion = true;
-		chg->typec_mode = POWER_SUPPLY_TYPEC_SOURCE_DEFAULT;
+		chg->typec_mode = QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT;
 		power_supply_changed(chg->usb_psy);
 	}
 	return;
@@ -11258,7 +11263,7 @@ int oplus_ccdetect_get_power_role(void)
 
 	if (!g_oplus_chip) {
 		printk(KERN_ERR "[OPLUS_CHG][%s]: smb5_chg not ready!\n", __func__);
-		return POWER_SUPPLY_TYPEC_PR_NONE;
+		return QTI_POWER_SUPPLY_TYPEC_PR_NONE;
 	}
 	chg = &g_oplus_chip->pmic_spmi.smb5_chip->chg;
 
@@ -11266,7 +11271,7 @@ int oplus_ccdetect_get_power_role(void)
 
 if (rc < 0) {
 		printk(KERN_ERR "[OPLUS_CHG][%s]: Couldn't get typec power role, rc=%d\n", __func__, rc);
-		return POWER_SUPPLY_TYPEC_PR_DUAL;
+		return QTI_POWER_SUPPLY_TYPEC_PR_DUAL;
 	}
 	return val.intval;
 }
@@ -13257,9 +13262,9 @@ static int smb5_usb_port_get_prop(struct power_supply *psy,
 		if (!val->intval)
 			break;
 
-		if (((chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_DEFAULT) ||
-			(chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_MEDIUM) ||
-			(chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_HIGH) ||
+		if (((chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SOURCE_DEFAULT) ||
+			(chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SOURCE_MEDIUM) ||
+			(chg->typec_mode == QTI_POWER_SUPPLY_TYPEC_SOURCE_HIGH) ||
 			(chg->connector_type == QTI_POWER_SUPPLY_CONNECTOR_MICRO_USB))
 			&& (chg->real_charger_type == POWER_SUPPLY_TYPE_USB))
 			val->intval = 1;
@@ -14297,7 +14302,7 @@ if (rc < 0) {
 	 * reset legacy cable detection by disabling/enabling typeC mode.
 	 */
 	if (chg->pd_not_supported && (val & TYPEC_LEGACY_CABLE_STATUS_BIT)) {
-		pval.intval = POWER_SUPPLY_TYPEC_PR_NONE;
+		pval.intval = QTI_POWER_SUPPLY_TYPEC_PR_NONE;
 		smblib_set_prop_typec_power_role(chg, &pval);
 if (rc < 0) {
 			dev_err(chg->dev, "Couldn't disable TYPEC rc=%d\n", rc);
@@ -14307,7 +14312,7 @@ if (rc < 0) {
 		/* delay before enabling typeC */
 		msleep(50);
 
-		pval.intval = POWER_SUPPLY_TYPEC_PR_DUAL;
+		pval.intval = QTI_POWER_SUPPLY_TYPEC_PR_DUAL;
 		smblib_set_prop_typec_power_role(chg, &pval);
 if (rc < 0) {
 			dev_err(chg->dev, "Couldn't enable TYPEC rc=%d\n", rc);
@@ -15276,7 +15281,7 @@ static int smb5_post_init(struct smb5 *chip)
         }
     } else {
 		/* configure power role for dual-role */
-		pval.intval = POWER_SUPPLY_TYPEC_PR_DUAL;
+		pval.intval = QTI_POWER_SUPPLY_TYPEC_PR_DUAL;
 		rc = smblib_set_prop_typec_power_role(chg, &pval);
 if (rc < 0) {
 			dev_err(chg->dev, "Couldn't configure DRP role rc=%d\n",
@@ -15288,7 +15293,7 @@ if (rc < 0) {
     //oplus_ccdetect_enable();
 #else
 	/* configure power role for dual-role */
-	pval.intval = POWER_SUPPLY_TYPEC_PR_DUAL;
+	pval.intval = QTI_POWER_SUPPLY_TYPEC_PR_DUAL;
 	rc = smblib_set_prop_typec_power_role(chg, &pval);
 
 if (rc < 0) {
