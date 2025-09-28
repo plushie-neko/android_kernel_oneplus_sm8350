@@ -35,7 +35,7 @@
 #endif
 
 #include <linux/irq.h>
-#include <linux/of_batterydata.h>
+#include "../../supply/qcom/battery-profile-loader.h"
 
 #ifdef VENDOR_EDIT
 #include <linux/gpio.h>

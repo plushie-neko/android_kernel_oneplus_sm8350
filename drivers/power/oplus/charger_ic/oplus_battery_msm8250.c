@@ -32,7 +32,7 @@
 #endif
 
 #include <linux/irq.h>
-#include <linux/of_batterydata.h>
+#include "../../supply/qcom/battery-profile-loader.h"
 #ifdef OPLUS_CUSTOM_OP_DEF
 #include <linux/ktime.h>
 #endif

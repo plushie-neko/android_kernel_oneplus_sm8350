@@ -29,7 +29,7 @@
 #endif
 
 #include <linux/irq.h>
-#include <linux/of_batterydata.h>
+#include "../../supply/qcom/battery-profile-loader.h"
 
 #ifdef OPLUS_FEATURE_CHG_BASIC
 #include <linux/gpio.h>

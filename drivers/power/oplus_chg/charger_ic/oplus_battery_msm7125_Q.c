@@ -20,7 +20,7 @@
 #include <linux/iio/consumer.h>
 #include <linux/pmic-voter.h>
 #include <linux/irq.h>
-#include <linux/of_batterydata.h>
+#include "../../supply/qcom/battery-profile-loader.h"
 #include <linux/ktime.h>
 
 #ifdef OPLUS_FEATURE_CHG_BASIC

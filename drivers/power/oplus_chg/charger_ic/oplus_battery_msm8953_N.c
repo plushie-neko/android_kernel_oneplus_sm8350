@@ -34,7 +34,7 @@
 #include <linux/leds.h>
 #include <linux/rtc.h>
 #include <linux/qpnp/qpnp-adc.h>
-#include <linux/of_batterydata.h>
+#include "../../supply/qcom/battery-profile-loader.h"
 #include <linux/msm_bcl.h>
 #include <linux/ktime.h>
 #ifdef CONFIG_OPLUS_SOC_RESTORE_SUPPORT

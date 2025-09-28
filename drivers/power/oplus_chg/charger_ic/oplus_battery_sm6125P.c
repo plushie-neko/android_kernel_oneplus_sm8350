@@ -26,7 +26,7 @@
 #include "../../../../kernel/msm-4.14/drivers/power/supply/qcom/battery.h"
 #include "../../../../kernel/msm-4.14/drivers/power/supply/qcom/step-chg-jeita.h"
 #include "oplus_battery_sm6125P.h"
-#include <linux/of_batterydata.h>
+#include "../../supply/qcom/battery-profile-loader.h"
 #include "op_charge.h"
 #include <linux/kthread.h>
 #endif

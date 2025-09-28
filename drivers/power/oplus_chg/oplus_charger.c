@@ -54,7 +54,7 @@
 #endif
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
 #include <linux/batterydata-lib.h>
-#include <linux/of_batterydata.h>
+#include "../supply/qcom/battery-profile-loader.h"
 #endif
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0))
 #include <linux/msm_bcl.h>
