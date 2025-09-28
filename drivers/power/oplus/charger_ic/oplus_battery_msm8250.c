@@ -2529,8 +2529,10 @@ void smblib_suspend_on_debug_battery(struct smb_charger *chg)
 	int rc;
 	union power_supply_propval val;
 
-	rc = smblib_get_prop_from_bms(chg,
-			POWER_SUPPLY_PROP_DEBUG_BATTERY, &val);
+/*
+				src = power_supply_get_property(chip->batt_psy,
+						POWER_SUPPLY_PROP_DEBUG_BATTERY, &val);
+*/
 
 	if (rc < 0) {
 		smblib_err(chg, "Couldn't get debug battery prop rc=%d\n", rc);
@@ -3973,7 +3975,7 @@ int smblib_dp_dm(struct smb_charger *chg, int val)
 	u8 stat;
 
 	switch (val) {
-	case POWER_SUPPLY_DP_DM_DP_PULSE:
+	case QTI_POWER_SUPPLY_DP_DM_DP_PULSE:
 		/*
 		 * Pre-emptively increment pulse count to enable the setting
 		 * of FSW prior to increasing voltage.
@@ -3998,21 +4000,20 @@ if (rc < 0) {
 		smblib_dbg(chg, PR_PARALLEL, "DP_DM_DP_PULSE rc=%d cnt=%d\n",
 				rc, chg->pulse_cnt);
 		break;
-	case POWER_SUPPLY_DP_DM_DM_PULSE:
+	case QTI_POWER_SUPPLY_DP_DM_DM_PULSE:
 		rc = smblib_dm_pulse(chg);
 		if (!rc && chg->pulse_cnt)
 			chg->pulse_cnt--;
 		smblib_dbg(chg, PR_PARALLEL, "DP_DM_DM_PULSE rc=%d cnt=%d\n",
 				rc, chg->pulse_cnt);
 		break;
-	case POWER_SUPPLY_DP_DM_ICL_DOWN:
+	case QTI_POWER_SUPPLY_DP_DM_ICL_DOWN:
 		target_icl_ua = get_effective_result(chg->usb_icl_votable);
 		if (target_icl_ua < 0) {
 			/* no client vote, get the ICL from charger */
-			rc = power_supply_get_property(chg->usb_psy,
-					POWER_SUPPLY_PROP_HW_CURRENT_MAX,
-					&pval);
-	if (rc < 0) {
+							rc = power_supply_get_property(chg->usb_psy,
+									POWER_SUPPLY_PROP_CURRENT_MAX,
+									&pval);	if (rc < 0) {
 				smblib_err(chg, "Couldn't get max curr rc=%d\n",
 					rc);
 				return rc;
@@ -4035,12 +4036,12 @@ if (rc < 0) {
 		smblib_dbg(chg, PR_PARALLEL, "ICL DOWN ICL=%d reduction=%d\n",
 				target_icl_ua, chg->usb_icl_delta_ua);
 		break;
-	case POWER_SUPPLY_DP_DM_FORCE_5V:
+	case QTI_POWER_SUPPLY_DP_DM_FORCE_5V:
 		rc = smblib_force_vbus_voltage(chg, FORCE_5V_BIT);
 		if (rc < 0)
 			pr_err("Failed to force 5V\n");
 		break;
-	case POWER_SUPPLY_DP_DM_FORCE_9V:
+	case QTI_POWER_SUPPLY_DP_DM_FORCE_9V:
 		if (chg->qc2_unsupported_voltage == QC2_NON_COMPLIANT_9V) {
 			smblib_err(chg, "Couldn't set 9V: unsupported\n");
 			return -EINVAL;
@@ -4065,7 +4066,7 @@ if (rc < 0) {
 		if (rc < 0)
 			pr_err("Failed to force 9V\n");
 		break;
-	case POWER_SUPPLY_DP_DM_FORCE_12V:
+	case QTI_POWER_SUPPLY_DP_DM_FORCE_12V:
 		if (chg->qc2_unsupported_voltage == QC2_NON_COMPLIANT_12V) {
 			smblib_err(chg, "Couldn't set 12V: unsupported\n");
 			return -EINVAL;
@@ -4090,7 +4091,7 @@ if (rc < 0) {
 		if (rc < 0)
 			pr_err("Failed to force 12V\n");
 		break;
-	case POWER_SUPPLY_DP_DM_ICL_UP:
+	case QTI_POWER_SUPPLY_DP_DM_ICL_UP:
 	default:
 		break;
 	}
@@ -4106,21 +4107,23 @@ int smblib_disable_hw_jeita(struct smb_charger *chg, bool disable)
 	/*
 	 * Disable h/w base JEITA compensation if s/w JEITA is enabled
 	 */
-#ifdef OPLUS_FEATURE_CHG_BASIC
-#ifdef OPLUS_CUSTOM_OP_DEF
+
+#if defined(OPLUS_FEATURE_CHG_BASIC) && defined(OPLUS_CUSTOM_OP_DEF)
 	mask =  JEITA_EN_HARDLIMIT_BIT |
-		JEITA_EN_COLD_SL_FCV_BIT |
-#endif
+		JEITA_EN_COLD_SL_FCV_BIT;
+#elif !defined(OPLUS_FEATURE_CHG_BASIC)
+	mask = JEITA_EN_COLD_SL_FCV_BIT;
 #else
-	mask = JEITA_EN_COLD_SL_FCV_BIT |
+	mask = 0;
 #endif
-		JEITA_EN_HOT_SL_FCV_BIT |
+	mask |= JEITA_EN_HOT_SL_FCV_BIT |
 		JEITA_EN_HOT_SL_CCC_BIT |
 		JEITA_EN_COLD_SL_CCC_BIT;
+
 	rc = smblib_masked_write(chg, JEITA_EN_CFG_REG, mask,
 			disable ? 0 : mask);
 
-if (rc < 0) {
+	if (rc < 0) {
 		dev_err(chg->dev, "Couldn't configure s/w jeita rc=%d\n",
 				rc);
 		return rc;
@@ -4128,7 +4131,6 @@ if (rc < 0) {
 
 	return 0;
 }
-
 static int smblib_set_sw_thermal_regulation(struct smb_charger *chg,
 						bool enable)
 {
@@ -4207,7 +4209,7 @@ if (rc < 0) {
 	if (chg->sec_chg_selected == QTI_POWER_SUPPLY_CHARGER_SEC_CP) {
 		if (is_cp_available(chg)) {
 			rc = power_supply_get_property(chg->cp_psy,
-				POWER_SUPPLY_PROP_CP_DIE_TEMP, &pval);
+				POWER_SUPPLY_PROP_CP_DIE_TEMPERATURE, &pval);
 	if (rc < 0) {
 				smblib_err(chg, "Couldn't get smb1390 charger temp, rc=%d\n",
 					rc);
@@ -4221,7 +4223,7 @@ if (rc < 0) {
 	} else if (chg->pl.psy && chg->sec_chg_selected ==
 					QTI_POWER_SUPPLY_CHARGER_SEC_PL) {
 		rc = power_supply_get_property(chg->pl.psy,
-				POWER_SUPPLY_PROP_CHARGER_TEMP, &pval);
+				POWER_SUPPLY_PROP_TEMP, &pval);
 if (rc < 0) {
 			smblib_err(chg, "Couldn't get smb1355 charger temp, rc=%d\n",
 					rc);
@@ -4407,7 +4409,7 @@ int smblib_get_prop_voltage_wls_output(struct smb_charger *chg,
 	}
 
 	rc = power_supply_get_property(chg->wls_psy,
-				POWER_SUPPLY_PROP_INPUT_VOLTAGE_REGULATION,
+				POWER_SUPPLY_PROP_INPUT_VOLTAGE_LIMIT,
 				val);
 	if (rc < 0)
 		dev_err(chg->dev, "Couldn't get POWER_SUPPLY_PROP_VOLTAGE_REGULATION, rc=%d\n",
@@ -4501,7 +4503,7 @@ int smblib_get_prop_dc_voltage_now(struct smb_charger *chg,
 	}
 
 	rc = power_supply_get_property(chg->wls_psy,
-				POWER_SUPPLY_PROP_INPUT_VOLTAGE_REGULATION,
+				POWER_SUPPLY_PROP_INPUT_VOLTAGE_LIMIT,
 				val);
 
 if (rc < 0) {
@@ -4536,7 +4538,7 @@ int smblib_set_prop_voltage_wls_output(struct smb_charger *chg,
 	}
 
 	rc = power_supply_set_property(chg->wls_psy,
-				POWER_SUPPLY_PROP_INPUT_VOLTAGE_REGULATION,
+				POWER_SUPPLY_PROP_INPUT_VOLTAGE_LIMIT,
 				val);
 	if (rc < 0)
 		dev_err(chg->dev, "Couldn't set POWER_SUPPLY_PROP_VOLTAGE_REGULATION, rc=%d\n",
